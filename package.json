@@ -1,0 +1,36 @@
+{
+  "name": "energia",
+  "version": "1.0.0",
+  "description": "Plataforma para teste de chatbots sobre eficiência energética utilizando modelos GPT e Claude - LABCEE / Faurb - UFPel",
+  "main": "src/server/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/server/server.js",
+    "dev": "nodemon src/server/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PedroThiagoRoque/EnergIA.git"
+  },
+  "keywords": [
+    "Eficiência",
+    "Energética",
+    "AI",
+    "GPT",
+    "Claude"
+  ],
+  "author": "Pedro Thiago Roque",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PedroThiagoRoque/EnergIA/issues"
+  },
+  "homepage": "https://github.com/PedroThiagoRoque/EnergIA#readme",
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.481.0",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "nodemon": "^3.0.2",
+    "openai": "^4.24.1"
+  }
+}

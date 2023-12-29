@@ -13,6 +13,7 @@ Neste projeto foram utilizadas as seguintes tecnologias:
 
 - Bootstrap
 - EJS
+- Express
 - Node.js
 - OpenAI API
 - Amazon Bedrock API
@@ -27,6 +28,14 @@ Neste projeto foram utilizadas as seguintes tecnologias:
 - [ ] Integração entre conversas prévias do usuário e a janela de contexto dos modelos
 - [ ] Integração com banco de tarefas de gamificação 
 
-### 🧰 Pré-Requisitos
+### 🧰 Versão online
+Acesse a versão online da plataforma no link:
+//link
 
+### 🧰 Pré-Requisitos
+Adicione a um arquivo .env as seguintes credenciais:
+
+- OpenAI APIkey
+- Amazon Bedrock Access key ID
+- Amazon Bedrock Secret Access Key
 ### 🔌 Executando o projeto
