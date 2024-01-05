@@ -27,6 +27,7 @@ Neste projeto foram utilizadas as seguintes tecnologias:
 - [ ] Cadastro de usuários
 - [ ] Integração entre conversas prévias do usuário e a janela de contexto dos modelos
 - [ ] Integração com banco de tarefas de gamificação 
+- [ ] Integração com OpenAI assistent API
 
 ### 🧰 Versão online
 Acesse a versão online da plataforma no link:
