@@ -60,7 +60,7 @@ router.post('/bedrock/ask', async (req, res) => {
 });
 
 router.get('/bedrock', (req, res) => {
-    res.render('chat/chat', { response: '' });
+    res.render('chat', { response: '' });
 });
 
 module.exports = router;

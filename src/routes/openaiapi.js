@@ -9,7 +9,7 @@ const openai = new OpenAI({
   });
 
   router.get('/openai', (req, res) => {
-    res.render('chat/chat', { response: '' });
+    res.render('chat', { response: '' });
 });
 
 router.post('/openai/ask', async (req, res) => {
