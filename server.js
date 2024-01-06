@@ -45,7 +45,7 @@ app.set('view engine', 'ejs');
 app.use(express.static(__dirname + "/public"));
 
 // Rota principal
-app.get('/', (req, res) => res.render('index'));
+app.get('/', (req, res) => res.render('home'));
 //app.get('/chat', (req, res) => res.render('chat'));
 
 app.get('/chat', (req,res) => { 

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💡 EnergIA: Eficiência Energética</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap');
+    </style>
+
+    <style> 
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #f8f9fa!important;
+        }
+
+        .jumbotron{
+        padding: 10%;
+        margin: 0% 3%;
+        /* Gradiente linear */
+        background: linear-gradient(135deg, #26aa21, #2a692d, #26aa21);
+
+        /* Efeito granulado */
+        background-size: 400% 400%;
+        animation: granular 30s ease infinite;
+    }
+
+    @keyframes granular {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    header{
+        padding: 2rem;
+        background-color:  #f8f9fa!important;
+    }
+
+    .card {
+    border-radius: 1.5rem; /* Bordas mais arredondadas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra leve e difusa */
+    }
+
+    .card-header,
+    .card-footer {
+        border-radius: 1.5rem!important; /* Bordas mais arredondadas */
+        padding-top: 1.5rem;
+    }
+
+    .emoji-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px; /* Tamanho do círculo */
+        height: 32px; /* Tamanho do círculo */
+        background-color: #e6e6e6; /* Cor de fundo cinza */
+        border-radius: 50%; /* Forma de círculo */
+        font-size: 1.5rem; /* Tamanho do emoji */
+        margin-right: 0.5rem; /* Espaço à direita do emoji */
+    }
+    .footercol {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .rounded-bottom-custom {
+    border-bottom-left-radius: 2rem!important;  /* Bootstrap geralmente usa rem para bordas arredondadas */
+    border-bottom-right-radius: 2rem!important; 
+    }
+
+    a[aria-disabled="true"] {
+    pointer-events: none; /* Desativa eventos de clique */
+    color: #fff;
+    background-color: #28a745;
+    opacity: 0.65; /* Faz o botão parecer desativado */
+}
+
+   
+    </style>
+
+</head>
+<body>
+
+    <header class="bg-light">
+        <div class="container">
+            Header
+        </div>
+    </header>
+
+    <section class="jumbotron text-white bg-success rounded rounded-bottom-custom">
+        <div class="container">
+            <h1 class="display-4">Bem-vindo ao EnergIA</h1>
+            <p class="lead">Um caminho inteligente para a eficiência energética.</p>
+            <hr class="my-4">
+            <!-- Ícones e botões aqui -->
+        </div>
+    </section>
+
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center">Funcionalidades</h2>
+            <p class="text-center">Transforme o processo de economia energética com inteligência artificial</p>
+        </div>
+        <div class="container my-5">
+            <div class="row">
+                        
+                <div class="col-md-4 mb-4"> 
+                    <div class="card h-100 shadow-sm rounded-lg">
+                        <div class="card-header bg-white rounded-top-lg">
+                            <span class="emoji-icon mr-2">🌱</span> 
+                            <h4 class="text-success d-inline">Chat EnergIA</h4>
+                            <p>Converse com modelos de IA</p>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li>Modelo GPT 3.5 - Turbo (OpenAI)</li>
+                                <li>Modelo Claude-v2 (Anthropic)</li>
+                                <li>+ de 16k de tokens</li>
+                                <li>Simula conversação natural</li>
+                                <li>Facilmente integrável e escalável</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-white rounded-bottom-lg ">
+                            <div class="container">
+                                <div class="row justify-content-center">
+                                    <div class="col footercol"> 
+                                        <a href="/chat" class="btn btn-success">Começar!</a>
+                                    </div> 
+                                    </div>
+                                </div>
+                               
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4"> 
+                        <div class="card h-100 shadow-sm rounded-lg">
+                            <div class="card-header bg-white rounded-top-lg">
+                                <span class="emoji-icon mr-2">🚧</span> 
+                                <h4 class="text-success d-inline">Editor EnergIA</h4>
+                                <p>Edite os parâmetros dos modelos</p>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled">
+                                    <li>Em construção</li>
+                                    <li>Em construção</li>
+                                    <li>Em construção</li>
+                                    <li>Em construção</li>
+                                    <li>Em construção</li>
+                                </ul>
+                            </div>
+                            <div class="card-footer bg-white rounded-bottom-lg ">
+                                <div class="container">
+                                    <div class="row justify-content-center">
+                                        <div class="col footercol"> 
+                                            <a href="#" class="btn btn-success" role="button" aria-disabled="true" tabindex="-1">Em Breve</a>
+                                        </div> 
+                                        </div>
+                                    </div>
+                                   
+                                </div>
+                            </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4"> 
+                        <div class="card h-100 shadow-sm rounded-lg">
+                            <div class="card-header bg-white rounded-top-lg">
+                                <span class="emoji-icon mr-2">🚧</span> 
+                                <h4 class="text-success d-inline">API EnergIA</h4>
+                                <p>Integre ao seu projeto</p>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled">
+                                    <li>Em construção</li>
+                                    <li>Em construção</li>
+                                    <li>Em construção</li>
+                                    <li>Em construção</li>
+                                    <li>Em construção</li>
+                                </ul>
+                            </div>
+                            <div class="card-footer bg-white rounded-bottom-lg ">
+                                <div class="container">
+                                    <div class="row justify-content-center">
+                                        <div class="col footercol"> 
+                                            <a href="#" class="btn btn-success" role="button" aria-disabled="true" tabindex="-1">Em Breve</a>
+                                        </div> 
+                                        </div>
+                                    </div>
+                                   
+                                </div>
+                            </div>
+                    </div>
+
+            </div>
+                
+
+                <!-- Card Standard -->
+                <!-- Similar structure to Regular, with respective content -->
+            </div>
+        </div>
+        
+    </section>
+    
+    <section class="py-5">
+    <div class="container">
+        <h2 class="text-center">Sobre o Projeto</h2>
+        <p class="text-center">Informações detalhadas sobre o projeto...</p>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 text-left">
+                Criado por <a href="https://github.com/PedroThiagoRoque" target="_blank">Pedro Thiago Roque</a>
+            </div>
+            <div class="col-md-6 text-right patrocinadores">
+                <!-- Espaço para os logos dos patrocinadores -->
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
