@@ -234,18 +234,18 @@
 
 
         const userInput = $('textarea[name="userInput"]').val();
-        endpoint ='/openai/ask'; //= isBedrock ? "/bedrock/ask" : "/openai/ask";
+        endpoint ='/chat/openai'; //= isBedrock ? "/bedrock/ask" : "/openai/ask";
         let selectedModel = "gpt";
 
         document.getElementById('gpt3').addEventListener('click', function() {
             selectedModel = "gpt";
-            endpoint = "/openai/ask";
+            endpoint = "/chat/openai";
             console.log("gpt"+ endpoint);
         });
 
         document.getElementById('claude').addEventListener('click', function() {
             selectedModel = "claude";
-            endpoint = "/bedrock/ask";
+            endpoint = "/chat/bedrock";
             console.log("claude"+endpoint);
         });    
 

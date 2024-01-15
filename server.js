@@ -7,10 +7,11 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 
 // Importe os módulos de rota
-const bedrockRouter = require('./src/routes/bedrock');
-const openaiRouter = require('./src/routes/openaiapi');
+//const bedrockRouter = require('./src/routes/bedrock');
+//const openaiRouter = require('./src/routes/openaiapi');
 
 //////////////////////////////////////////////////////
+//Configurações de APIs
 const OpenAI = require('openai');
 require('dotenv').config();
 
@@ -31,7 +32,6 @@ const cliente = new BedrockRuntimeClient({
 });
 ///////////////////////////////////////////////////////
 
-// Use os routers com os prefixos definidos
 //app.use(bedrockRouter);
 //app.use(openaiRouter);
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -46,20 +46,27 @@ app.use(express.static(__dirname + "/public"));
 
 // Rota principal
 app.get('/', (req, res) => res.render('home'));
-//app.get('/chat', (req, res) => res.render('chat'));
 
+//Tela de chat padrão
 app.get('/chat', (req,res) => { 
     res.render('chat', {response: ''});
 });
 
+//chat com editor de prompt
+app.get('/editor', (req,res) => { 
+    res.render('editorprompt/editor', {response: ''});
+});
+
 ///////////////////////////////////////
+//ROTAS CHAT
+
 //Rotas OPENAI
 
 router.get('/openai', (req, res) => {
     res.render('chat', { response: '' });
 });
 
-router.post('/openai/ask', async (req, res) => {
+router.post('/chat/openai', async (req, res) => {
     const userInput = req.body.userInput;
 
     const openAiResponse = await getOpenAiResponse(userInput);
@@ -87,6 +94,19 @@ async function getOpenAiResponse(prompt) {
 
 //https://docs.anthropic.com/claude/docs/configuring-gpt-prompts-for-claude
 //https://docs.anthropic.com/claude/docs/configuring-gpt-prompts-for-claude#keeping-claude-in-character
+
+router.post('/chat/bedrock', async (req, res) => {
+
+    const userInput = req.body.userInput;
+    const claudeResponse = await getClaudeResponse(userInput);
+
+    res.json({ claudeResponse });
+});
+
+router.get('/bedrock', (req, res) => {
+    res.render('chat', { response: '' });
+});
+
 
 async function getClaudeResponse(entrada) {
 
@@ -119,18 +139,6 @@ async function getClaudeResponse(entrada) {
     }
 
 }
-
-router.post('/bedrock/ask', async (req, res) => {
-
-    const userInput = req.body.userInput;
-    const claudeResponse = await getClaudeResponse(userInput);
-
-    res.json({ claudeResponse });
-});
-
-router.get('/bedrock', (req, res) => {
-    res.render('chat', { response: '' });
-});
 
 ///////////////////////////////////////////
 
