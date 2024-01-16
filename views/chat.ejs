@@ -233,8 +233,8 @@
     $(document).ready(function(){
 
 
-        const userInput = $('textarea[name="userInput"]').val();
-        endpoint ='/chat/openai'; //= isBedrock ? "/bedrock/ask" : "/openai/ask";
+       
+        endpoint ='/chat/openai';
         let selectedModel = "gpt";
 
         document.getElementById('gpt3').addEventListener('click', function() {
@@ -246,11 +246,14 @@
         document.getElementById('claude').addEventListener('click', function() {
             selectedModel = "claude";
             endpoint = "/chat/bedrock";
-            console.log("claude"+endpoint);
+            console.log("claude"+ endpoint);
         });    
 
 
     $('form').submit(function(event){
+        const userInput = $('textarea[name="userInput"]').val();
+        console.log("você: "+ userInput);
+        
         event.preventDefault();
 
         // Adicionar animação de carregamento

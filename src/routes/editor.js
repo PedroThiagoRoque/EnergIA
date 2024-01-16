@@ -53,6 +53,7 @@ async function getOpenAiResponse(prompt) {
             ],
             model: "gpt-3.5-turbo",
         });
+        
         return response;
     } catch (error) {
         console.error('Erro ao comunicar com a OpenAI API:', error);

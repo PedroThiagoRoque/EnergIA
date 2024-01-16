@@ -53,6 +53,7 @@ async function getOpenAiResponse(prompt) {
             ],
             model: "gpt-3.5-turbo",
         });
+        console.log("você: "+ prompt);
         return response;
     } catch (error) {
         console.error('Erro ao comunicar com a OpenAI API:', error);
@@ -97,6 +98,7 @@ async function getClaudeResponse(entrada) {
         const completion = JSON.parse(
             Buffer.from(response.body).toString("utf-8")
           );
+            console.log(entrada);
             console.log(completion);
         return completion;
     }  
