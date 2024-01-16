@@ -1,6 +1,7 @@
 //ROUTES
 const express = require('express');
 const router = express.Router();
+
 const OpenAI = require('openai');
 require('dotenv').config();
 
@@ -12,7 +13,11 @@ const openai = new OpenAI({
     res.render('chat', { response: '' });
 });
 
-router.post('/openai/ask', async (req, res) => {
+router.get('/openai', (req, res) => {
+    res.render('chat', { response: '' });
+});
+
+router.post('/chat/openai', async (req, res) => {
     const userInput = req.body.userInput;
 
     const openAiResponse = await getOpenAiResponse(userInput);
