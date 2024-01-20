@@ -1,29 +1,29 @@
 {
-    "tema": "eficiência energética",
-    "areas_de_interesse": [
+    "Tema": "eficiência energética",
+    "Àreas_de_interesse": [
         "residencial",
         "industrial",
         "prédios públicos",
         "energia solar",
         "veículos elétricos"
     ],
-    "nivel_de_conhecimento": [
+    "Nivel_de_conhecimento": [
         "básico",
         "intermediário",
         "alto"
     ],
-    "estilo_de_comunicacao": [
+    "Estilo_de_comunicação": [
         "formal",
         "informal",
         "técnico"
     ],
-    "personalidade": [
+    "Personalidade": [
         "amigável",
         "sério",
         "didático",
         "sarcástico"
     ],
-    "humor": {
+    "Humor": {
         "ativo": true,
         "nivel": [
             1,
@@ -33,23 +33,23 @@
             5
         ]
     },
-    "brevidade_das_respostas": [
+    "Brevidade_das_respostas": [
         "curta",
         "média",
         "longa"
     ],
-    "idioma": [
+    "Idioma": [
         "português",
         "inglês",
         "espanhol"
     ],
-    "localizacao": [ 
+    "Localizacao": [ 
         "Pelotas - RS - Brasil", 
         "Porto Alegre - RS - Brasil"
     ],
-    "avaliacao_periodica": {
+    "Avaliacao_periodica": {
         "ativo": true,
         "intervalo_de_perguntas": 5
     },
-    "historico_de_interacao": ""
+    "Historico_de_interacao": ""
 }

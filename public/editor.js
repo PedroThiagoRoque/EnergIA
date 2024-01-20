@@ -128,3 +128,105 @@ document.addEventListener('DOMContentLoaded', function() {
 function configuraPrompt(prompt) {
 
 }
+
+function configuraOpcoes(url) {
+    fetch(url)
+        .then(response => response.json())
+        .then(configuracoes => {
+            const painelOpcoes = document.getElementById('painelopcoes');
+            painelOpcoes.innerHTML = ''; // Limpa o painel de opções existente
+            
+            // Função auxiliar para tratar valores de configuração
+            function trataValor(chave, valor, container) {
+                if (typeof valor === 'boolean') {
+                    // Cria um checkbox para booleanos
+                    const label = document.createElement('label');
+                    label.className = 'checkbox-custom';
+                    label.textContent = chave.replace(/_/g, ' '); //deixa legivel tirando o _ e colocando espaço
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = valor;
+
+                    const checkmark = document.createElement('span');
+                    checkmark.className = 'checkmark';
+
+                    label.appendChild(checkbox);
+                    label.appendChild(checkmark);
+                    checkbox.onchange = () => console.log(`${chave}: ${checkbox.checked}`);
+                    //label.appendChild(checkbox);
+                    container.appendChild(label);
+                } else if (Array.isArray(valor)) {
+                    // Cria botões para arrays
+                    valor.forEach(item => {
+                        const botao = document.createElement('button');
+                        botao.classList.add('btn', 'btn-primary', 'm-1');
+                        botao.textContent = item;
+                        botao.onclick = () => console.log(item);
+                        container.appendChild(botao);
+                    });
+                } else if (typeof valor === 'number') {
+                    // Cria um campo de número para inteiros
+                    const numberInput = document.createElement('input');
+                    numberInput.type = 'number';
+                    numberInput.className = 'input-number-custom';
+                    numberInput.value = valor;
+                    numberInput.onchange = () => console.log(`${chave}: ${numberInput.value}`);
+                    container.appendChild(numberInput);
+                } else if (typeof valor === 'object' && valor !== null) {
+                    // Para objetos, itera recursivamente
+                    Object.keys(valor).forEach(subChave => {
+                        trataValor(subChave, valor[subChave], container);
+                    });
+                } else {
+                    // Para outros tipos (string), cria um parágrafo
+                    const p = document.createElement('p');
+                    p.textContent = `${chave}: ${valor}`;
+                    container.appendChild(p);
+                }
+            }
+
+            // Itera sobre cada chave do objeto JSON
+            Object.keys(configuracoes).forEach(chave => {
+                const secao = document.createElement('div');
+                secao.classList.add('config-section');
+                const titulo = document.createElement('h5');
+                titulo.textContent = chave.replace(/_/g, ' ');
+                secao.appendChild(titulo);
+
+                trataValor(chave, configuracoes[chave], secao);
+                painelOpcoes.appendChild(secao);
+            });
+        })
+        .catch(error => {
+            console.error('Erro ao carregar configurações:', error);
+        });
+}
+
+// Chama a função quando a página carrega
+document.addEventListener('DOMContentLoaded', function() {
+    const jsonUrl = '/public/configuracao_chatbot.json'; // URL do seu arquivo JSON
+    configuraOpcoes(jsonUrl);
+});
+
+////////////////////////////////////////////////////////////////////////////////////
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Seleciona todos os botões dentro do painel de opções
+    const painelOpcoes = document.getElementById('painelopcoes');
+    painelOpcoes.addEventListener('click', function(e) {
+        // Verifica se o alvo do clique é um botão
+        if (e.target.tagName === 'BUTTON') {
+            // Busca a seção atual do botão clicado
+            const secaoAtual = e.target.closest('.config-section');
+            if (secaoAtual) {
+                // Remove a classe 'btn-selected' dos outros botões na mesma seção
+                secaoAtual.querySelectorAll('.btn').forEach(btn => {
+                    btn.classList.remove('btn-selected');
+                });
+                // Adiciona a classe 'btn-selected' ao botão clicado
+                e.target.classList.add('btn-selected');
+            }
+        }
+    });
+});
