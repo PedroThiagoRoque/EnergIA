@@ -23,16 +23,14 @@
         "didático",
         "sarcástico"
     ],
-    "Humor": {
-        "ativo": true,
-        "nivel": [
-            1,
-            2,
-            3,
-            4,
-            5
-        ]
-    },
+    "Humor_Ativo": true,
+    "Humor_Nivel": [
+        1,
+        2,
+        3,
+        4,
+        5
+    ],
     "Brevidade_das_respostas": [
         "curta",
         "média",

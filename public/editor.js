@@ -125,9 +125,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
 //////////////////////////////////////////////////////////////////////////////////
 
-function configuraPrompt(prompt) {
+// Objeto de mapeamento
+const mapeamentoChaves = {
+    tema: 'tema',
+    areas_de_interesse: 'area',
+    nivel_de_conhecimento: 'nivelConhecimento',
+    estilo_de_comunicacao: 'estiloComunicacao',
+    personalidade: 'personalidade',
+    humor: 'humor',
+    humor_nivel: 'humorNivel',
+    Humor_Ativo: '' ,
+    Humor_Nivel: '',
+    brevidade_das_respostas: 'breviedade',
+    idioma: 'idioma',
+    localizacao: 'localidade',
+    avaliacao_periodica: 'roundAvaliacao',
+    historico_de_interacao: 'historicoInteracao'
+};
 
+
+// Estado inicial
+let estadoConfiguracoes = {
+    tema: '',
+    area: '',
+    nivelConhecimento: '',
+    estiloComunicacao: '',
+    personalidade: '',
+    humor: false,
+    humorNivel: 1,
+    breviedade: '',
+    idioma: '',
+    localidade: '',
+    roundAvaliacao: 5,
+    historicoInteracao: ''
+};
+
+
+function atualizaEstado(chaveJson, valor) {
+    // Utiliza o objeto de mapeamento para encontrar a chave correspondente
+    const chaveEstado = mapeamentoChaves[chaveJson] || chaveJson;
+    estadoConfiguracoes[chaveEstado] = valor;
+    console.log(`Configuração '${chaveEstado}' atualizada para: ${valor}`);
 }
+
 
 function configuraOpcoes(url) {
     fetch(url)
@@ -153,7 +193,8 @@ function configuraOpcoes(url) {
 
                     label.appendChild(checkbox);
                     label.appendChild(checkmark);
-                    checkbox.onchange = () => console.log(`${chave}: ${checkbox.checked}`);
+                    //checkbox.onchange = () => console.log(`${chave}: ${checkbox.checked}`); //ALTERAR
+                    checkbox.onchange = () => atualizaEstado(chave, checkbox.checked);
                     //label.appendChild(checkbox);
                     container.appendChild(label);
                 } else if (Array.isArray(valor)) {
@@ -162,7 +203,8 @@ function configuraOpcoes(url) {
                         const botao = document.createElement('button');
                         botao.classList.add('btn', 'btn-primary', 'm-1');
                         botao.textContent = item;
-                        botao.onclick = () => console.log(item);
+                        //botao.onclick = () => console.log(item); //ALTERAR
+                        botao.onclick = () => atualizaEstado(chave, item);
                         container.appendChild(botao);
                     });
                 } else if (typeof valor === 'number') {
@@ -171,7 +213,8 @@ function configuraOpcoes(url) {
                     numberInput.type = 'number';
                     numberInput.className = 'input-number-custom';
                     numberInput.value = valor;
-                    numberInput.onchange = () => console.log(`${chave}: ${numberInput.value}`);
+                    //numberInput.onchange = () => console.log(`${chave}: ${numberInput.value}`); //ALTERAR
+                    numberInput.onchange = () => atualizaEstado(chave, item);
                     container.appendChild(numberInput);
                 } else if (typeof valor === 'object' && valor !== null) {
                     // Para objetos, itera recursivamente
@@ -230,3 +273,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+////////////////////////////////////////////////////////////////////////////////////
