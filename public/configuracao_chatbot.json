@@ -1,52 +1,70 @@
 {
     "Tema": "eficiência energética",
-    "Àreas_de_interesse": [
+    "areas_de_interesse": [
         "residencial",
         "industrial",
         "prédios públicos",
         "energia solar",
-        "veículos elétricos"
+        "veículos elétricos",
+        "iluminação pública",
+        "iluminação residencial",
+        "construção sustentável",
+        "energia eólica",
+        "energia hidráulica",
+        "energia nuclear",
+        "energia de biomassa",
+        "Automação residencial",
+        "Auditoria energética"
     ],
-    "Nivel_de_conhecimento": [
+    "nivel_de_conhecimento": [
         "básico",
         "intermediário",
         "alto"
     ],
-    "Estilo_de_comunicação": [
+    "estilo_de_comunicacao": [
         "formal",
         "informal",
-        "técnico"
+        "técnico",
+        "empático",
+        "narrativo",
+        "direto",
+        "consultivo"
     ],
-    "Personalidade": [
+    "personalidade": [
         "amigável",
-        "sério",
-        "didático",
-        "sarcástico"
+        "séria",
+        "didática",
+        "sarcástica",
+        "engraçada",
+        "inovador",
+        "entusiasta",
+        "pragmatica",
+        "inspiradora"
     ],
-    "Humor_Ativo": true,
-    "Humor_Nivel": [
+    "humor": false,
+    "humor_nivel": [
         1,
         2,
         3,
         4,
         5
     ],
-    "Brevidade_das_respostas": [
+    "brevidade_das_respostas": [
         "curta",
         "média",
         "longa"
     ],
-    "Idioma": [
+    "idioma": [
         "português",
         "inglês",
         "espanhol"
     ],
-    "Localizacao": [ 
+    "localizacao": [ 
         "Pelotas - RS - Brasil", 
         "Porto Alegre - RS - Brasil"
     ],
-    "Avaliacao_periodica": {
-        "ativo": true,
+    "avaliacao_periodica": {
+        "ativo": false,
         "intervalo_de_perguntas": 5
     },
     "Historico_de_interacao": ""

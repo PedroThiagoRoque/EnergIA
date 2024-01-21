@@ -244,6 +244,32 @@
     border-color: #4caf50; /* Cor da borda para hover */
 }
 
+.config-visualization-container {
+    border-radius: 15px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 20px;
+    color: #333;
+}
+
+.text-preview {
+    white-space: pre-line; /* Mantém quebras de linha */
+}
+
+/* Estilos para as variáveis do texto de visualização */
+.variavel-tema { color: #4caf50; } /* Verde */
+.variavel-area { color: #007bff; } /* Azul */
+.variavel-nivelConhecimento { color: #ff5722; } /* Laranja */
+.variavel-estiloComunicacao { color: #9c27b0; } /* Roxo */
+.variavel-personalidade { color: #e91e63; } /* Rosa */
+.variavel-humor { color: #00bcd4; } /* Ciano */
+.variavel-humorNivel { color: #c9b508; } /* Amarelo */
+.variavel-breviedade { color: #8bc34a; } /* Verde Claro */
+.variavel-idioma { color: #ff9800; } /* Laranja Claro */
+.variavel-localidade { color: #858484; } /* Cinza */
+.variavel-roundAvaliacao { color: #3f51b5; } /* Índigo */
+.variavel-historicoInteracao { color: #4d6977; } /* Azul Cinza */
 
     
     </style>
@@ -303,6 +329,14 @@
                             </div>
                             <button type="submit" class="btn btn-primary btn-block">Enviar</button>
                         </form>
+                    </div>
+
+                    <!-- Seção de Visualização de Configurações -->
+                    <div class="config-visualization-container rounded bg-white mt-3 p-3">
+                        <h2 class="mb-4">Prompt de sistema:</h2> 
+                        <div id="configText" class="text-preview">
+                            
+                        </div>
                     </div>
                 </div>
             </div>
