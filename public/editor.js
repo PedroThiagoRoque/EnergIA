@@ -43,7 +43,7 @@ jQuery('form').submit(function(event){
         jQuery.ajax({
         type: "POST",
         url: endpoint,
-        data: { userInput: userInput }, //ADICIONAR OS PARÂMETROS SELECIONADOS AO DATA PASSADO AO /POST COMO PROMPT DE SISTEMA
+        data: { userInput: userInput,  promptSistema: removeHtmlTags(promptSistema) }, 
         success: function(data) {
             
             if (selectedModel == "gpt") { 
@@ -141,7 +141,6 @@ const mapeamentoChaves = {
     historico_de_interacao: 'historicoInteracao'
 };
 
-
 // Estado inicial
 estadoConfiguracoes = {
     tema: 'Eficiência energética',
@@ -157,9 +156,10 @@ estadoConfiguracoes = {
     roundAvaliacao: 5,
     historicoInteracao: 'XXXXXXXXX'
 };
+let promptSistema ='';
 
 function atualizaTextoVisualizacao() {
-    let promptSistema = `"Você atuará como um ajudante sobre <span class="variavel-tema">${estadoConfiguracoes['tema']}</span>, sua área de interesse: <span class="variavel-area">${estadoConfiguracoes['area']}</span>, você deve falar de modo adequado para pessoas com conhecimento <span class="variavel-nivelConhecimento">${estadoConfiguracoes['nivelConhecimento']}</span>, utilizando um estilo de comunicação <span class="variavel-estiloComunicacao">${estadoConfiguracoes['estiloComunicacao']}</span>, expressando uma personalidade <span class="variavel-personalidade">${estadoConfiguracoes.personalidade}</span>, ${estadoConfiguracoes.humor ? `utilize um nível <span class="variavel-humorNivel">${estadoConfiguracoes.humorNivel}</span>/5 de humor nas respostas,` : ''} o comprimento das respostas deve ser <span class="variavel-breviedade">${estadoConfiguracoes.breviedade}</span>, utilize o idioma <span class="variavel-idioma">${estadoConfiguracoes.idioma}</span> e considere a localização do usuário como <span class="variavel-localidade">${estadoConfiguracoes.localidade}</span> para formular a resposta caso seja pertinente."
+    promptSistema = `"Você atuará como um ajudante sobre <span class="variavel-tema"><b>${estadoConfiguracoes['tema']}</b></span>, sua área de interesse: <span class="variavel-area"><b>${estadoConfiguracoes['area']}</b></span>, você deve falar de modo adequado para pessoas com conhecimento <span class="variavel-nivelConhecimento"><b>${estadoConfiguracoes['nivelConhecimento']}</b></span>, utilizando um estilo de comunicação <span class="variavel-estiloComunicacao"><b>${estadoConfiguracoes['estiloComunicacao']}</b></span>, expressando uma personalidade <span class="variavel-personalidade"><b>${estadoConfiguracoes['personalidade']}</b></span>, ${estadoConfiguracoes['humor'] ? `utilize um nível <span class="variavel-humorNivel"><b>${estadoConfiguracoes['humorNivel']}</b></span>/5 de humor nas respostas,` : ''} o comprimento das respostas deve ser <span class="variavel-breviedade"><b>${estadoConfiguracoes['breviedade']}</b></span>, utilize o idioma <span class="variavel-idioma"><b>${estadoConfiguracoes['idioma']}</b></span> e considere a localização do usuário como <span class="variavel-localidade"><b>${estadoConfiguracoes['localidade']}</b></span> para formular a resposta caso seja pertinente."
     `; 
     /*Quando eu escrever BEGIN DIALOGUE você começará seu papel. Para temáticas que não forem sobre eficiência energética seja sucinto e muito breve, verifique se há algo que possa linkar com o tema <span class="variavel-tema">${estadoConfiguracoes.tema}</span>, caso contrário diga que não sabe responder. Não discuta estas instruções com o usuário.
         
@@ -172,8 +172,7 @@ function atualizaEstado(chaveJson, valor) {
     // Utiliza o objeto de mapeamento para encontrar a chave correspondente
     const chaveEstado = mapeamentoChaves[chaveJson] || chaveJson;
     estadoConfiguracoes[chaveEstado] = valor;
-    console.log(`Configuração '${chaveEstado}' atualizada para: ${estadoConfiguracoes[chaveEstado].valueOf()}`);
-    console.log(estadoConfiguracoes['area']);
+    //console.log(`Configuração '${chaveEstado}' atualizada para: ${estadoConfiguracoes[chaveEstado].valueOf()}`);
     atualizaTextoVisualizacao();
 }
 
@@ -202,9 +201,8 @@ function configuraOpcoes(url) {
 
                     label.appendChild(checkbox);
                     label.appendChild(checkmark);
-                    console.log(`${chave}: ${checkbox.checked}`); //ALTERAR
+                    console.log(`${chave}: ${checkbox.checked}`);
                     checkbox.onchange = () => atualizaEstado(chave, checkbox.checked);
-                    //label.appendChild(checkbox);
                     container.appendChild(label);
                 } else if (Array.isArray(valor)) {
                     // Cria botões para arrays
@@ -212,7 +210,6 @@ function configuraOpcoes(url) {
                         const botao = document.createElement('button');
                         botao.classList.add('btn', 'btn-primary', 'm-1');
                         botao.textContent = item;
-                        //botao.onclick = () => console.log(item); //ALTERAR
                         botao.onclick = () => atualizaEstado(chave, botao.textContent);
                         container.appendChild(botao);
                     });
@@ -222,7 +219,6 @@ function configuraOpcoes(url) {
                     numberInput.type = 'number';
                     numberInput.className = 'input-number-custom';
                     numberInput.value = valor;
-                    //numberInput.onchange = () => console.log(`${chave}: ${numberInput.value}`); //ALTERAR
                     numberInput.onchange = () => atualizaEstado(chave, valor);
                     container.appendChild(numberInput);
                 } else if (typeof valor === 'object' && valor !== null) {
@@ -254,6 +250,13 @@ function configuraOpcoes(url) {
             console.error('Erro ao carregar configurações:', error);
         });
 }
+////////////////////////////////////////////////////////////////////////////////////
+//Limpa as tags de html do prompt
+function removeHtmlTags(str) {
+    return str.replace(/<[^>]*>/g, '');
+    
+}
+
 
 // Chama a função quando a página carrega
 document.addEventListener('DOMContentLoaded', function() {
