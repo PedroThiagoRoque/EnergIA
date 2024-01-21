@@ -30,6 +30,7 @@ jQuery(document).ready(function(){
 
 
 jQuery('form').submit(function(event){
+    const userInput = $('textarea[name="userInput"]').val();
     event.preventDefault();
 
     // Adicionar animação de carregamento
