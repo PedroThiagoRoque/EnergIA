@@ -21,8 +21,8 @@ Neste projeto foram utilizadas as seguintes tecnologias:
 ### 📝 Features
 - [X] Chatbot utilizando modelo GPT 3.5 turbo (OpenAI)
 - [X] Chatbot utilizando modelo Claude-2 (Anthropic)
-- [ ] Estrutura para seleção de parâmetros de prompt de sistema 
-- [ ] Seleção de personalidade para o chatbot
+- [X] Estrutura para seleção de parâmetros de prompt de sistema 
+- [X] Seleção de personalidade para o chatbot
 - [ ] Integração com banco de dados de usuários e consumo energético
 - [ ] Cadastro de usuários
 - [ ] Integração entre conversas prévias do usuário e a janela de contexto dos modelos

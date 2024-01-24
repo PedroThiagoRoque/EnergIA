@@ -9,7 +9,7 @@ const chatRouter = require('./src/routes/chat');
 const editorRouter = require('./src/routes/editor');
 
 app.use(bodyParser.urlencoded({ extended: true }));
-const port = 3000;
+const port = 80;
 
 app.use(express.json());
 
@@ -38,3 +38,4 @@ app.listen(port, () => console.log(`Servidor rodando na porta ${port}!`));
 
 //////////////////////////////
 
+w
