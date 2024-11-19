@@ -17,8 +17,8 @@
           <div class="card-body">
             <form action="/register" method="POST">
               <div class="mb-3">
-                <label for="username" class="form-label">Nome de Usuário</label>
-                <input type="text" class="form-control" id="username" name="username" required>
+                <label for="name" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="name" name="name" required>
               </div>
               <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
@@ -30,7 +30,10 @@
               </div>
               <div class="mb-3">
                 <label for="group" class="form-label">Grupo</label>
-                <input type="text" class="form-control" id="group" name="group" required>
+                <select class="form-select" id="group" name="group" required>
+                  <option value="Grupo Watts">Grupo Watts</option>
+                  <option value="Grupo Lumens">Grupo Lumens</option>
+                </select>
               </div>
               <div class="mb-3">
                 <label for="ageRange" class="form-label">Faixa Etária</label>
@@ -62,6 +65,5 @@
       </div>
     </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard do Usuário</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <style>
+    body {
+      background: url('/public/bgEnergIA3.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 3px solid #fff;
+      border-radius: 15px;
+      position: relative;
+    }
+
+    .logo-small {
+      left: 10px;
+      width: 150px;
+    }
+
+    .card-custom {
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+    }
+
+    .btn-custom {
+      background-color: #444;
+      color: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 1.1em;
+      
+    }
+
+    .btn-custom:hover {
+      background-color: #555;
+      color: #fff;
+    }
+
+    .greeting {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    .temp-card, .consumption-card {
+      background-color: rgba(0, 0, 0, 0);
+      padding: 10px 9px;
+      border-radius: 25px;
+      min-width: 110px;
+      text-align: left!important;
+      border: 2px solid #fff; /* Contorno branco */
+    }
+
+    .temp-card h5, .consumption-card h5{
+        font-size: 1rem;
+        font-weight: bold;
+    }
+
+    .temp-card h2, .consumption-card h2{
+        font-weight: 800;
+    }
+
+    .card-custom {
+        background-color: rgba(0, 0, 0, 0); 
+        border: 2px solid #fff; /* Contorno branco */
+    }
+
+    .icon-user {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #666;
+      float: right;
+    }
+
+    .footer-fixed {
+      position: absolute;
+      bottom: 20px;
+      width: calc(100% - 40px);
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Logo pequena no canto superior esquerdo -->
+   
+
+    <!-- Primeira Row: Saudação do usuário + Ícone -->
+    <div class="row align-items-center mb-4">
+      <div class="col-md-9">
+        <img src="/public/logo-EnergIA.png" alt="Logo Energia" class="logo-small">
+        
+      </div>
+      <div class="col-md-3 text-right">
+        <div class="icon-user"></div>
+      </div>
+    </div>
+
+    <!-- Segunda Row: Dividida em 3 colunas -->
+    <div class="row" style="position: relative; height: 400px;">
+      <!-- Coluna 1: Nome e Botão Vamos Conversar -->
+       
+      <div class="col-md-4 d-flex flex-column justify-content-end">
+        <div class="greeting">Olá, <%= userName %>!</div>
+        <button class="btn btn-lg btn-custom w-100 mb-3">Vamos Conversar</button>
+      </div>
+
+      <!-- Coluna 2: Informações rápidas e Série Histórica -->
+      <div class="col-md-4 d-flex flex-column justify-content-end ">
+        <div class="d-flex justify-content-start mb-3">
+          <div class="temp-card text-center">
+            <h5>Tempo</h5>
+            <h2><%= temperature %>ºC</h2>
+          </div>
+          <div class="consumption-card text-center ml-3">
+            <h5>Último Consumo</h5>
+            <h2>152 kWh</h2>
+          </div>
+        </div>
+        <div class="card card-custom">
+          <div class="card-body">
+            <h5>Comparação</h5>
+            <div class="d-flex justify-content-around align-items-end">
+              <div class="text-center">
+                <div style="height: 120px; width: 30px; background-color: #ff5722;"></div>
+                <p>Dez</p>
+              </div>
+              <div class="text-center">
+                <div style="height: 80px; width: 30px; background-color: #ff5722;"></div>
+                <p>Jan</p>
+              </div>
+              <div class="text-center">
+                <div style="height: 100px; width: 30px; background-color: #ff5722;"></div>
+                <p>Fev</p>
+              </div>
+              <div class="text-center">
+                <div style="height: 140px; width: 30px; background-color: #00ff00;"></div>
+                <p>Mar</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coluna 3: Botões de Pontuação, Histórico, Dica -->
+      <div class="col-md-4 d-flex flex-column justify-content-end">
+        <button class="btn btn-lg btn-custom w-100 mb-3">Pontuação</button>
+        <button class="btn btn-lg btn-custom w-100 mb-3">Histórico de Consumo</button>
+        <button class="btn btn-lg btn-custom w-100">Dica Aleatória</button>
+      </div>
+    </div>
+
+    <!-- Rodapé com o nome do laboratório -->
+    <div class="row footer-fixed">
+      <div class="col-12 text-center">
+        <p>LABCEE / UFPel - 2024</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
