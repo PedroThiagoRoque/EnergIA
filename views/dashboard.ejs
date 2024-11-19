@@ -9,25 +9,29 @@
 
   <style>
     body {
-        background: url('/public/bgEnergIA3.jpg') no-repeat center center fixed;
+      background: url('/public/bgEnergIA3.jpg') no-repeat center center fixed;
       background-size: cover;
       color: #fff;
       font-family: Arial, sans-serif;
-      height: 100vh; /* Ocupa toda a altura da viewport */
-      display: flex; /* Utiliza flexbox para centralização */
-      justify-content: center; /* Centraliza horizontalmente */
-      align-items: center; /* Centraliza verticalmente */
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; /* Alinhamento no topo para deixar espaço para crescer */
       margin: 0;
-      
+      padding: 20px 0;
     }
 
     .dashboard-container {
-    width: 100%;
+      width: 95%;
       max-width: 1200px;
-      margin: 20px;
       padding: 20px;
       border: 3px solid #fff;
       border-radius: 15px;
+      background-color: rgba(0, 0, 0, 0.7);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .logo-small {
@@ -50,7 +54,6 @@
       align-items: center;
       text-decoration: none;
       font-weight: bold;
-      
     }
 
     .icon-container {
@@ -64,10 +67,9 @@
     }
 
     .icon-container i {
-    color: #fff; /* Cor do ícone */
-    font-size: 1.5rem; /* Tamanho do ícone */
+      color: #fff;
+      font-size: 1.5rem;
     }
-
 
     .btn-custom:hover {
       background-color: #555;
@@ -84,22 +86,22 @@
       padding: 10px 9px;
       border-radius: 25px;
       min-width: 110px;
-      text-align: left!important;
-      border: 2px solid #fff; /* Contorno branco */
+      text-align: left !important;
+      border: 2px solid #fff;
     }
 
-    .temp-card h5, .consumption-card h5{
-        font-size: 1rem;
-        font-weight: bold;
+    .temp-card h5, .consumption-card h5 {
+      font-size: 1rem;
+      font-weight: bold;
     }
 
-    .temp-card h2, .consumption-card h2{
-        font-weight: 800;
+    .temp-card h2, .consumption-card h2 {
+      font-weight: 800;
     }
 
     .card-custom {
-        background-color: rgba(0, 0, 0, 0); 
-        border: 2px solid #fff; /* Contorno branco */
+      background-color: rgba(0, 0, 0, 0);
+      border: 2px solid #fff;
     }
 
     .icon-user {
@@ -107,30 +109,49 @@
       height: 50px;
       border-radius: 50%;
       background-color: #666;
-      float: right;
     }
 
     .footer {
       text-align: center;
-      margin-top: 20px;
-      padding: 0px;
+      padding: 10px 0;
       color: #fff;
     }
-    .footer p{
-        margin-bottom: 0;
+
+    .footer p {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-container {
+        margin: 20px;
+      }
+
+      .btn-custom {
+        font-size: 1em;
+        padding: 10px;
+      }
+
+      .greeting {
+        font-size: 0.9em;
+      }
+
+      .icon-container {
+        padding: 8px;
+      }
+
+      .icon-user {
+        width: 40px;
+        height: 40px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="dashboard-container">
-    <!-- Logo pequena no canto superior esquerdo -->
-   
-
     <!-- Primeira Row: Saudação do usuário + Ícone -->
     <div class="row align-items-center mb-4">
       <div class="col-md-9">
         <img src="/public/logo-EnergIA.png" alt="Logo Energia" class="logo-small">
-        
       </div>
       <div class="col-md-3 text-right">
         <div class="icon-user"></div>
@@ -138,16 +159,15 @@
     </div>
 
     <!-- Segunda Row: Dividida em 3 colunas -->
-    <div class="row" style="position: relative; height: 400px;">
+    <div class="row">
       <!-- Coluna 1: Nome e Botão Vamos Conversar -->
-       
-      <div class="col-md-4 d-flex flex-column justify-content-end">
+      <div class="col-md-4 d-flex flex-column justify-content-end mb-3">
         <div class="greeting">Olá,<br><h3> <%= userName %>!</h3></div>
-        <button class="btn btn-lg btn-custom w-100 mb-3">Vamos Conversar</button>
+        <button class="btn btn-lg btn-custom w-100 mt-3">Vamos Conversar</button>
       </div>
 
       <!-- Coluna 2: Informações rápidas e Série Histórica -->
-      <div class="col-md-4 d-flex flex-column justify-content-end ">
+      <div class="col-md-4 d-flex flex-column justify-content-end mb-3">
         <div class="d-flex justify-content-start mb-3">
           <div class="temp-card text-center">
             <h5>Tempo</h5>
@@ -184,7 +204,7 @@
       </div>
 
       <!-- Coluna 3: Botões de Pontuação, Histórico, Dica -->
-      <div class="col-md-4 d-flex flex-column justify-content-end">
+      <div class="col-md-4 d-flex flex-column justify-content-end mb-3">
         <a href="/chat" class="btn btn-lg btn-custom w-100 mb-3">
           <div class="icon-container">
             <i class="fas fa-trophy"></i>
@@ -208,8 +228,8 @@
 
     <!-- Rodapé com o nome do laboratório -->
     <footer class="footer">
-        <p>LABCEE / UFPel - 2024</p>
-      </footer>
+      <p>LABCEE / UFPel - 2024</p>
+    </footer>
   </div>
 </body>
 </html>
