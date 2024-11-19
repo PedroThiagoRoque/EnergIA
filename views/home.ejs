@@ -1,230 +1,747 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💡 EnergIA: Eficiência Energética</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap');
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EnergIA - Eficiência Energética</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <style> 
-        body {
-            font-family: 'Lato', sans-serif;
-            background-color: #f8f9fa!important;
-        }
-
-        .jumbotron{
-        padding: 10%;
-        margin: 0% 3%;
-        /* Gradiente linear */
-        background: linear-gradient(135deg, #26aa21, #2a692d, #26aa21);
-
-        /* Efeito granulado */
-        background-size: 400% 400%;
-        animation: granular 30s ease infinite;
+  <style>
+    /* Estilos gerais */
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-color: #0C0C0C;
+      font-family: 'Arial', sans-serif;
+      color: #EFECE4; /* Cor do texto */
+      font-family: "Open Sans", sans-serif;
     }
 
-    @keyframes granular {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    header{
-        padding: 2rem;
-        background-color:  #f8f9fa!important;
-    }
-
-    .card {
-    border-radius: 1.5rem; /* Bordas mais arredondadas */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra leve e difusa */
+     /* Hero Section */
+     .hero-section {
+      background: url('/public/bgEnergIA.jpg') center/cover no-repeat, #0c0c0c;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100vh;
+      padding-top: 5%;
+      padding-bottom: 5%;
+      border-radius: 20px; /* Ajuste o valor conforme necessário para arredondar os cantos */
     }
 
-    .card-header,
-    .card-footer {
-        border-radius: 1.5rem!important; /* Bordas mais arredondadas */
-        padding-top: 1.5rem;
+    .custom-container {
+      position: relative;
+      width: 80%;
+      max-width: 1200px;
+      margin: auto;
+      border: 2px solid white;
+      border-radius: 20px;
+      background-color: rgba(255, 255, 255, 0); /* Fundo transparente */
+      padding: 30px;
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: white;
+      
     }
 
-    .emoji-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px; /* Tamanho do círculo */
-        height: 32px; /* Tamanho do círculo */
-        background-color: #e6e6e6; /* Cor de fundo cinza */
-        border-radius: 50%; /* Forma de círculo */
-        font-size: 1.5rem; /* Tamanho do emoji */
-        margin-right: 0.5rem; /* Espaço à direita do emoji */
+      /* Estilo dos botões */
+      .btn-login, .btn-register {
+      padding: 10px 20px;
+      font-size: 1.1rem;
+      border-radius: 20px;
+      margin-right: 10px;
     }
-    .footercol {
-        display: flex;
+
+    .btn-login {
+      background-color: #dcdcdc;
+      color: black;
+      border: none;
+    }
+
+    .btn-register {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+    }
+
+    /* Ajustar tamanho da logo */
+    .logo img {
+        width: 250px;
+      }
+
+
+    /* Estilos para info-section */
+    .info-section {
+      padding: 30px 0;
+    }
+
+    .info-section .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .info-section .content {
+      max-width: 50%;
+      padding: 20px;
+    }
+
+    .info-section .content h2 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+
+    .info-section .content p {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: #EFECE4;
+    }
+
+    .info-section .content .stats {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+
+    .info-section .content .stat-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .info-section .content .stat-label {
+      font-size: 1rem;
+      color: #EFECE4;
+    }
+
+    .info-section .content .btn {
+      padding: 12px 24px;
+      font-size: 1rem;
+      background: transparent;
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 30px;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .info-section .content .btn:hover {
+      background: #EFECE4;
+      color: #0c0c0c;
+    }
+
+    .info-section .image-container {
+      max-width: 40%;
+      padding: 20px;
+    }
+
+    .info-section .image-container img {
+      width: 100%;
+      border-radius: 20px;
+      object-fit: cover;
+    }
+
+    @media (max-width: 768px) {
+      .info-section .container {
+        flex-direction: column;
+      }
+
+      .info-section .content, .info-section .image-container {
+        max-width: 100%;
+        text-align: center;
+      }
+
+      .info-section .content h2 {
+        font-size: 2rem;
+      }
+
+      .info-section .content .stats {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+
+    /* Estilos para dispositivos móveis */
+    @media (max-width: 768px) {
+      .hero-section {
+        background: url('/public/bgEnergIA.jpg') right/cover no-repeat, #0c0c0c;
+      }
+
+      .custom-container {
+        padding: 20px;
+      }
+
+      /* Centralizar logo e botões */
+      .d-flex.justify-content-between.align-items-center {
         flex-direction: column;
         align-items: center;
+      }
+
+      .logo {
+        margin-bottom: 20px;
+      }
+
+      /* Ajustar tamanho da logo */
+      .logo img {
+        width: 150px;
+      }
+
+      /* Botões em bloco */
+      .buttons {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      .buttons .a {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+
+      /* Ajuste de fontes e espaçamentos */
+      .btn-login, .btn-register {
+        font-size: 1rem;
+        padding: 12px;
+      }
+
+      /* Centralizar textos inferiores */
+      .d-flex.justify-content-between.align-items-end {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .bottom-left, .bottom-right {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      /* Ajustar tamanhos de fonte */
+      .bottom-left h2 {
+        font-size: 1.5rem;
+      }
+
+      .bottom-left p,
+      .bottom-right p {
+        font-size: 1rem;
+      }
     }
 
-    .rounded-bottom-custom {
-    border-bottom-left-radius: 2rem!important;  /* Bootstrap geralmente usa rem para bordas arredondadas */
-    border-bottom-right-radius: 2rem!important; 
-    }
-
-    a[aria-disabled="true"] {
-    pointer-events: none; /* Desativa eventos de clique */
-    color: #fff;
-    background-color: #28a745;
-    opacity: 0.65; /* Faz o botão parecer desativado */
+    /* Estilo para o card de desafios */
+.card-desafios {
+  background-color: #1a1a1a; /* Cinza mais claro que o fundo */
+  border-radius: 15px; /* Bordas arredondadas */
+  padding: 40px; /* Espaçamento interno */
+  max-width: 900px; /* Largura máxima */
+  margin: 20px auto; /* Centraliza horizontalmente */
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5); /* Sombra suave */
+  border: 1px solid #333; /* Bordas levemente destacadas */
 }
 
-   
-    </style>
+/* Estilo para o texto de introdução */
+.card-intro {
+  font-size: 1rem;
+  color: #bfbfbf; /* Cor de destaque */
+  font-weight: bold;
+  letter-spacing: 1px;
+}
 
+/* Estilo para o título do card */
+.card-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fff; /* Cor do texto principal */
+  margin-bottom: 10px;
+}
+
+/* Estilo para o texto do card */
+.card-text {
+  font-size: 1.1rem;
+  color: #d3d3d3; /* Cinza claro para o texto */
+  line-height: 1.6;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+  .card-desafios {
+    padding: 20px;
+  }
+  
+  .card-title {
+    font-size: 1.5rem;
+  }
+  
+  .card-text {
+    font-size: 1rem;
+  }
+}
+
+/* Seção de Tecnologia */
+.technology-section {
+  background-color: #0c0c0c; /* Fundo escuro */
+  color: #EFECE4; /* Texto claro */
+}
+
+/* Título da Seção */
+.text-highlight {
+  color: #bfbfbf; /* Cor de destaque */
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.section-title {
+  font-size: 2rem;
+  margin-top: 10px;
+  margin-bottom: 40px;
+}
+
+/* Estilo dos Cards */
+.tech-card {
+  background-color: #1a1a1a; /* Fundo do card */
+  border-radius: 15px; /* Cantos arredondados */
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3); /* Sombra suave */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: left; /* Texto alinhado à esquerda */
+  padding-top: 60px; /* Espaçamento superior para o ícone */
+}
+
+.tech-card:hover {
+  transform: translateY(-5px); /* Eleva o card ao passar o mouse */
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5); /* Sombra mais destacada */
+}
+
+/* Estilo do Ícone com Font Awesome */
+.tech-icon {
+  top: 20px;
+  left: 20px;
+  background: #119f04; /* Fundo verde */
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tech-icon i {
+  color: #fff; /* Cor do ícone */
+  font-size: 1.5rem; /* Tamanho do ícone */
+}
+
+/* Estilo do Título e Texto */
+.tech-title {
+  color: #fff; /* Cor branca para o título */
+  margin-top: 20px;
+  font-size: 1.2rem;
+}
+
+.tech-description {
+  color: #bfbfbf; /* Texto de descrição mais claro */
+  font-size: 1rem;
+  margin-top: auto; /* Alinha o texto no fundo */
+}
+
+/* Ajuste de responsividade */
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 1.8rem;
+  }
+
+  .tech-title {
+    font-size: 1.1rem;
+  }
+
+  .tech-description {
+    font-size: 0.9rem;
+  }
+}
+/* Estilo do Espaçador */
+.spacer {
+  height: 60px; /* Ajuste a altura conforme necessário */
+}
+
+/* Seção de Equipe */
+.team-section {
+  background-color: #0c0c0c; /* Fundo escuro */
+  color: #EFECE4; /* Texto claro */
+}
+
+/* Título da Seção */
+.text-highlight {
+  color: #bfbfbf; /* Cor de destaque */
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.section-title {
+  font-size: 2rem;
+  margin-top: 10px;
+  margin-bottom: 40px;
+}
+
+/* Estilo dos Cards da Equipe */
+.team-card {
+  background-color: #1a1a1a; /* Fundo do card */
+  border-radius: 15px; /* Cantos arredondados */
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3); /* Sombra suave */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  color: #EFECE4; /* Cor do texto */
+}
+
+.team-card:hover {
+  transform: translateY(-5px); /* Eleva o card ao passar o mouse */
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5); /* Sombra mais destacada */
+}
+
+.team-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.team-role {
+  font-size: 0.9rem;
+  color: #bfbfbf; /* Cor para o subtítulo */
+}
+
+.team-description {
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+.team-date {
+  font-size: 0.85rem;
+  color: #bfbfbf; /* Data com cor mais clara */
+}
+
+/* Ajuste da imagem */
+.team-card img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%; /* Torna a imagem circular */
+}
+
+/* Ajuste de responsividade */
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 1.8rem;
+  }
+
+  .team-name {
+    font-size: 1.1rem;
+  }
+
+  .team-description {
+    font-size: 0.9rem;
+  }
+}
+
+.imgresultados{
+  width: 320px!important;
+  height: 320px!important;
+}
+/* Estilo do Footer */
+.footer {
+  background-color: #1A1A1A; /* Cor de fundo */
+  color: #EFECE4; /* Cor do texto */
+  font-size: 1rem;
+  padding: 20px;
+}
+
+
+  </style>
 </head>
 <body>
 
-    <header class="bg-light">
-        <div class="container">
-            Header
+   <!-- Hero Section -->
+   <section class="hero-section">
+    <div class="custom-container">
+      <!-- Linha superior com logo e botões -->
+      <div class="d-flex justify-content-between align-items-center">
+        <!-- Logo -->
+        <div class="logo">
+          <img src="/public/logo-EnergIA.png" alt="Logo EnergIA">
         </div>
-    </header>
-
-    <section class="jumbotron text-white bg-success rounded rounded-bottom-custom">
-        <div class="container">
-            <h1 class="display-4">Bem-vindo ao EnergIA</h1>
-            <p class="lead">Um caminho inteligente para a eficiência energética.</p>
-            <hr class="my-4">
-            <!-- Ícones e botões aqui -->
+         
+        <div class="buttons">
+          <a href="/login" class="btn btn-login">Log in</a>
+          <a href="/register" class="btn btn-register">Registrar-se</a>
         </div>
-    </section>
+      </div>
 
-    <section class="py-5 bg-light ">
-        <div class="container">
-            <h2 class="text-center">Funcionalidades</h2>
-            <p class="text-center">Transforme o processo de economia energética com inteligência artificial</p>
+      <!-- Linha inferior com textos -->
+      <div class="d-flex justify-content-between align-items-end">
+        <!-- Texto inferior esquerdo -->
+        <div class="bottom-left">
+          <h2>Economize energia com <strong>inteligência</strong></h2>
+          <p>Um agente conversacional para um campus sustentável e econômico</p>
         </div>
-        <div class="container my-5">
-            <div class="row">
-                        
-                <div class="col-md-4 mb-4"> 
-                    <div class="card h-100 shadow-sm rounded-lg">
-                        <div class="card-header bg-white rounded-top-lg">
-                            <span class="emoji-icon mr-2">🌱</span> 
-                            <h4 class="text-success d-inline">Chat EnergIA</h4>
-                            <p>Converse com modelos de IA</p>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled">
-                                <li>Modelo GPT 3.5 - Turbo (OpenAI)</li>
-                                <li>Modelo Claude-v2 (Anthropic)</li>
-                                <li>+ de 16k de tokens</li>
-                                <li>Simula conversação natural</li>
-                                <li>Facilmente integrável e escalável</li>
-                            </ul>
-                        </div>
-                        <div class="card-footer bg-white rounded-bottom-lg ">
-                            <div class="container">
-                                <div class="row justify-content-center">
-                                    <div class="col footercol"> 
-                                        <a href="/chat" class="btn btn-success">Começar!</a>
-                                    </div> 
-                                    </div>
-                                </div>
-                               
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4 mb-4"> 
-                        <div class="card h-100 shadow-sm rounded-lg">
-                            <div class="card-header bg-white rounded-top-lg">
-                                <span class="emoji-icon mr-2">🚧</span> 
-                                <h4 class="text-success d-inline">Editor EnergIA</h4>
-                                <p>Edite os parâmetros dos modelos</p>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-unstyled">
-                                    <li>Modelo GPT 3.5 - Turbo (OpenAI)</li>
-                                    <li>Modelo Claude-v2 (Anthropic)</li>
-                                    <li>+ de 16k de tokens</li>
-                                    <li>Painel para ajuste de prompt de sistema</li>
-                                    <li>Visualização em tempo real de alterações</li>
-                                </ul>
-                            </div>
-                            <div class="card-footer bg-white rounded-bottom-lg ">
-                                <div class="container">
-                                    <div class="row justify-content-center">
-                                        <div class="col footercol"> 
-                                            <a href="/editor" class="btn btn-success">Começar!</a>
-                                        </div> 
-                                        </div>
-                                    </div>
-                                   
-                                </div>
-                            </div>
-                    </div>
-
-                    <div class="col-md-4 mb-4"> 
-                        <div class="card h-100 shadow-sm rounded-lg">
-                            <div class="card-header bg-white rounded-top-lg">
-                                <span class="emoji-icon mr-2">🚧</span> 
-                                <h4 class="text-success d-inline">API EnergIA</h4>
-                                <p>Integre ao seu projeto</p>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-unstyled">
-                                    <li>Em construção ..</li>
-                                    <li><br></li>
-                                    <li><br></li>
-                                    <li><br></li>
-                                    <li><br></li>
-                                </ul>
-                            </div>
-                            <div class="card-footer bg-white rounded-bottom-lg ">
-                                <div class="container">
-                                    <div class="row justify-content-center">
-                                        <div class="col footercol"> 
-                                            <a href="#" class="btn btn-success" role="button" aria-disabled="true" tabindex="-1">Em Breve</a>
-                                        </div> 
-                                        </div>
-                                    </div>
-                                   
-                                </div>
-                            </div>
-                    </div>
-
-            </div>
-                
-
-                <!-- Card Standard -->
-                <!-- Similar structure to Regular, with respective content -->
-            </div>
+        <!-- Texto inferior direito -->
+        <div class="bottom-right">
+          <p>LABCEE / UFPel / 2024</p>
         </div>
-        
-    </section>
-    
-    <section class="py-3">
-    <div class="container">
-        <h2 class="text-center">Sobre o Projeto</h2>
-        <p class="text-center">Informações detalhadas sobre o projeto...</p>
+      </div>
+
     </div>
+  </section>
+
+<!-- Seção de Informações Chatbot EnergIA -->
+<section class="info-section">
+  <div class="container">
+    <!-- Card de Desafios -->
+    <div class="card-desafios p-4 text-center text-md-start mx-auto d-flex flex-column flex-md-row align-items-center">
+      <!-- Conteúdo de texto -->
+      <div class="card-text-content flex-grow-1">
+        <!-- Título pequeno acima -->
+        <p class="card-intro mb-3 text-uppercase text-left">Chatbot EnergIA</p>
+        <!-- Texto principal em destaque -->
+        <h3 class="card-title mb-4 text-left">
+          Uma abordagem inovadora para economia de energia
+        </h3>
+        <!-- Texto descritivo -->
+        <p class="card-text mb-4 text-left">
+          EnergIA é um chatbot projetado para educar e engajar usuários de edificações universitárias em práticas de eficiência energética. Ele interage por meio de uma interface amigável, promovendo a conscientização e participação em desafios gamificados, usando dados reais de consumo. Fácil de expandir para outros prédios monitorados, o EnergIA facilita mudanças comportamentais sustentáveis de forma escalável e eficiente.
+        </p>
+      </div>
+      <!-- Imagem dentro do card -->
+      <div class="card-image ms-md-4 mt-4 mt-md-0 d-flex align-items-center ">
+        <img src="EnergIA-bloco.png" alt="Desafios" class="rounded img-fluid" style="max-width: 200px;">
+      </div>
+    </div>
+  </div>
 </section>
 
-<footer class="footer">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6 text-left">
-                Criado por <a href="https://github.com/PedroThiagoRoque" style="color: #26aa21;"target="_blank">Pedro Thiago Roque</a>
-            </div>
-            <div class="col-md-6 text-right patrocinadores">
-                <!-- Espaço para os logos dos patrocinadores -->
-            </div>
-        </div>
+<!-- Seções de Informações -->
+<section class="info-section">
+  <div class="container">
+    <!-- Card de Desafios -->
+    <div class="card-desafios  p-4 text-center mx-auto">
+      <!-- Título pequeno acima -->
+      <p class="card-intro mb-3 text-uppercase">Desafios</p>
+      <!-- Texto principal em destaque -->
+      <h3 class="card-title mb-4">
+        Os principais desafios de implementar eficiência energética de forma inteligente
+      </h3>
+      <!-- Texto descritivo -->
+      <p class="card-text mb-4 ">
+        É necessário alinhar o conforto dos usuários com o uso eficiente de energia, superar os custos de automação, e promover a conscientização e engajamento para mudanças de comportamento. A subjetividade na percepção de conforto e a necessidade de estratégias eficazes de incentivo, como gamificação e chatbots, são barreiras críticas a serem enfrentadas.
+      </p>
     </div>
+  </div>
+</section>
+
+  
+<!-- Seção de Informações Chatbot EnergIA -->
+<section class="info-section">
+  <div class="container">
+    <!-- Card de Desafios -->
+    <div class="card-desafios p-4 text-center text-md-start mx-auto d-flex flex-column flex-md-row align-items-center">
+      <!-- Conteúdo de texto -->
+      <div class="card-text-content flex-grow-1">
+        <!-- Título pequeno acima -->
+        <p class="card-intro mb-3 text-uppercase text-left">Contexto</p>
+        <!-- Texto principal em destaque -->
+        <h3 class="card-title mb-4 text-left">
+          A origem do Projeto
+        </h3>
+        <!-- Texto descritivo -->
+        <p class="card-text mb-4 text-left mr-3">
+          O chatbot EnergIA está inserido no projeto "Validação de sistema de gamificação, gestão e automação na nuvem para eficiência energética de edificações públicas com foco inicial em universidades" do LABCEE - UFPel, que tem como objetivo otimizar o consumo energético de edificações públicas, especialmente universidades, utilizando sistemas inovadores de automação, práticas gamificadas e chatbots para conscientizar e incentivar mudanças comportamentais nos usuários. A solução integra o monitoramento de energia, temperatura, presença e luminosidade, controlando iluminação e climatização para aumentar a eficiência energética. 
+          <br>
+          As práticas gamificadas, aliadas ao uso de chatbots, têm o papel de educar os usuários sobre hábitos sustentáveis e promover seu engajamento, tornando o uso dos espaços mais consciente e eficiente. O projeto propõe uma abordagem integrada de gestão de recursos para redução do consumo energético, melhoria do conforto e promoção da sustentabilidade ambiental.
+        </p>
+      </div>
+      <!-- Imagem dentro do card -->
+      <div class="card-image ms-md-4 mt-4 mt-md-0 d-flex align-items-center ">
+        <img src="/public/bloco2CA.jpg" alt="Bloco2ca" class="rounded img-fluid" style="max-width: 200px;">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Seção de Tecnologia -->
+<section class="technology-section py-5">
+  <div class="container">
+    <!-- Título da Seção -->
+    <div class="text-center mb-5">
+      <p class="text-uppercase text-highlight">Tecnologia</p>
+      <h2 class="section-title">
+        As principais tecnologias que tornam o EnergIA possível
+      </h2>
+    </div>
+
+    <!-- Cards de Tecnologias -->
+    <div class="row g-4">
+      <!-- Card de Tecnologia 1 -->
+      <div class="col-md-4">
+        <div class="tech-card p-4  position-relative mb-4"> 
+          <!-- Ícone no topo esquerdo usando Font Awesome -->
+          <div class="tech-icon position-absolute">
+            <i class="fas fa-brain"></i> <!-- Ícone substituído pelo Font Awesome -->
+          </div>
+          <!-- Elemento vazio para espaçamento -->
+          <div class="spacer"></div>
+          <!-- Conteúdo de texto -->
+          <h4 class="tech-title">Inteligência Artificial</h4>
+          <p class="tech-description text-justify">
+            O projeto utiliza o Claude 3.5 Sonnet, um LLM da Anthropic, para criar interações naturais e personalizadas sobre eficiência energética, integrando gamificação e dados em tempo real através de Retrieval Augmented Generation e Prompt Engineering.
+          </p>
+        </div>
+      </div>
+
+      <!-- Card de Tecnologia 2 -->
+      <div class="col-md-4">
+        <div class="tech-card p-4 position-relative mb-4">
+          <!-- Ícone no topo esquerdo usando Font Awesome -->
+          <div class="tech-icon position-absolute">
+            <i class="fas fa-microchip"></i>
+          </div>
+          <!-- Elemento vazio para espaçamento -->
+          <div class="spacer"></div>
+          <!-- Conteúdo de texto -->
+          <h4 class="tech-title">Dados de IoT e Sensores</h4>
+          <p class="tech-description text-justify">
+            O projeto integra dados de IoT e sensores para monitorar consumo de energia, temperatura e luminosidade em tempo real, fornecendo insights precisos para otimizar a eficiência energética e melhorar a interação dos usuários com o ambiente.
+          </p>
+        </div>
+      </div>
+
+      <!-- Card de Tecnologia 3 -->
+      <div class="col-md-4">
+        <div class="tech-card p-4 position-relative mb-4">
+          <!-- Ícone no topo esquerdo usando Font Awesome -->
+          <div class="tech-icon position-absolute">
+            <i class="fas fa-cogs"></i>
+          </div>
+          <!-- Elemento vazio para espaçamento -->
+          <div class="spacer"></div>
+          <!-- Conteúdo de texto -->
+          <h4 class="tech-title">Interatividade Multiplataforma</h4>
+          <p class="tech-description text-justify">
+            O projeto desenvolve app e site com Node.js e React para fornecer interfaces intuitivas, permitindo monitoramento em tempo real, controle de consumo energético e participação em atividades gamificadas, facilitando a interação e engajamento dos usuários.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="info-section">
+    <div class="container">
+      <div class="content">
+        <h2>Resultados Esperados</h2>
+        <p>Espera-se criar um agente conversacional replicável que ofereça orientações sobre eficiência energética, promovendo mudanças positivas nos hábitos dos usuários e comportamentos sustentáveis. O agente gerará recomendações personalizadas com base em dados reais de consumo, adaptando-se a diferentes perfis de usuários. Além disso, serão produzidos relatórios e artigos que documentem o impacto educativo do agente, evidenciando sua capacidade de engajamento e influência no comportamento por meio de interações oportunas e gamificação.</p>
+        
+      </div>
+      <div class="image-container">
+        <img src="resultados.png" class="imgresultados" alt="Resultados Esperados">
+      </div>
+    </div>
+  </section>
+
+  <!-- Seção de Equipe do Projeto -->
+<section class="team-section py-5">
+  <div class="container">
+    <!-- Título da Seção -->
+    <div class="text-center mb-5">
+      <p class="text-uppercase text-highlight">Equipe do Projeto</p>
+      <h2 class="section-title">Conheça a equipe do EnergIA</h2>
+    </div>
+
+    <!-- Grid de Cards da Equipe -->
+    <div class="row">
+      <!-- Card do Autor (maior card) -->
+      <div class="col-md-12 mb-4">
+        <div class="team-card p-4">
+          <div class="d-flex align-items-center mb-3">
+            <img src="pedro.jpg" alt="Autor" class="rounded-circle mr-3" style="width: 60px; height: 60px;">
+            <div>
+              <h5 class="team-name">Pedro Thiago Roque</h5>
+              <p class="team-role">Autor do Projeto</p>
+            </div>
+          </div>
+          <p class="team-description text-justify">
+            Pedro Thiago Roque é mestrando pelo Programa de Pós-Graduação em Computação pela Universidade Federal de Pelotas. Com experiência em desenvolvimento de software, pesquisa acadêmica e extensão em Ciência da Computação (UFPel). Atuação profissional em desenvolvimento de jogos, aplicações para geometria BIM, computação gráfica, e tecnologias de suporte para pesquisa em Arquitetura e Urbanismo.
+          </p>
+          
+        </div>
+      </div>
+
+      <!-- Card do Orientador 1 -->
+      <div class="col-md-4 mb-4">
+        <div class="team-card p-4">
+          <div class="d-flex align-items-center mb-3">
+            <img src="patricia.webp" alt="Orientador 1" class="rounded-circle mr-3" style="width: 60px; height: 60px;">
+            <div>
+              <h5 class="team-name">Profª Drª Patrícia Jaques Maillard</h5>
+              <p class="team-role">Orientadora</p>
+            </div>
+          </div>
+          <p class="team-description">
+            Atua em Inteligência Artificial aplicada à Educação, Informática Educativa e Computação Afetiva. Sua pesquisa foca no uso de IA para aprimorar processos educacionais e na análise de emoções em ambientes de aprendizagem para melhorar a interação estudante-sistema.
+          </p>
+          
+        </div>
+      </div>
+
+      <!-- Card do Orientador 2 -->
+      <div class="col-md-4 mb-4">
+        <div class="team-card p-4">
+          <div class="d-flex align-items-center mb-3">
+            <img src="tatiana.jpg" alt="Orientador 2" class="rounded-circle mr-3" style="width: 60px; height: 60px;">
+            <div>
+              <h5 class="team-name">Profª Drª Tatiana Aires Tavares</h5>
+              <p class="team-role">Co-orientadora</p>
+            </div>
+          </div>
+          <p class="team-description">
+            Atua em Interação Humano-Computador, acessibilidade e interfaces não convencionais. Sua pesquisa foca principalmente em métodos de avaliação, interfaces para múltiplos dispositivos e desenvolvimento de soluções acessíveis para melhorar a interação entre usuários e sistemas.
+          </p>
+          
+        </div>
+      </div>
+
+      <!-- Card do Orientador 3 -->
+      <div class="col-md-4 mb-4">
+        <div class="team-card p-4">
+          <div class="d-flex align-items-center mb-3">
+            <img src="antonio.jpg" alt="Orientador 3" class="rounded-circle mr-3" style="width: 60px; height: 60px;">
+            <div>
+              <h5 class="team-name">Prof. Dr. Antônio César Silveira Baptista da Silva</h5>
+              <p class="team-role">Co-orientador</p>
+            </div>
+          </div>
+          <p class="team-description">
+            Atua em eficiência energética em edificações, conforto ambiental e condicionamento natural. Sua pesquisa foca na avaliação e melhoria da eficiência energética, soluções para resfriamento evaporativo e consultoria para otimização de conforto térmico em ambientes construídos.
+          </p>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer text-white text-center py-3">
+  Desenvolvido por <a href="https://github.com/PedroThiagoRoque" target="_blank" class="text-white">
+    Pedro Thiago Roque
+  </a> (2024)
 </footer>
 
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.bundle.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
