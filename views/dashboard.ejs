@@ -21,13 +21,13 @@
       padding: 20px 0;
     }
 
-    .dashboard-container {
+        .dashboard-container {
       width: 95%;
       max-width: 1200px;
       padding: 20px;
       border: 3px solid #fff;
       border-radius: 15px;
-      background-color: rgba(0, 0, 0, 0.7);
+      background-color: rgba(0, 0, 0, 0.0);
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
@@ -56,6 +56,52 @@
       font-weight: bold;
     }
 
+.btn-conversar {
+  background: linear-gradient(-45deg, #009D17, #01EA41, #009D17, #004317);
+  color: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 1.1em;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  height: 20vh;
+  text-decoration: none;
+  font-weight: bold;
+  background-size: 400% 400%;
+  animation: gradientMove 7s ease infinite, scaleUp 1s ease-in-out infinite alternate;
+  transition: transform 0.3s ease;
+}
+
+.btn-conversar:hover , :after{
+    color:#fff
+}
+
+.btn-conversar .icon-lamp {
+  font-size: 2.5rem; /* Aumenta o tamanho do ícone para se destacar */
+}
+
+.btn-conversar span {
+  font-size: 1.5rem; /* Define um tamanho de fonte adequado */
+  line-height: 1.8rem;
+  text-align: center;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes scaleUp {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
     .icon-container {
       background-color: #666;
       padding: 10px;
@@ -105,10 +151,15 @@
     }
 
     .icon-user {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background-color: #666;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #666;
+    }
+
+    .icon-user i {
+    color: #fff; /* Cor do ícone */
+    font-size: 1.5rem; /* Tamanho do ícone */
     }
 
     .footer {
@@ -143,6 +194,35 @@
         width: 40px;
         height: 40px;
       }
+
+        /* Ajuste para manter o logo e o ícone do usuário na mesma linha em mobile */
+     .row.align-items-center {
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* Garante que o logo e o ícone fiquem nas extremidades */
+      }
+
+      .logo-small {
+        width: 100px; /* Reduzir o tamanho do logo em dispositivos menores */
+      }
+
+      .icon-user {
+        width: 40px;
+        height: 40px;
+      }
+     
+    .btn-conversar {
+        height: 25vh; /* Aumentar a altura em resoluções menores para caber os elementos */
+    }
+
+    .btn-conversar span {
+        font-size: 1.8rem; /* Ajuste o tamanho da fonte em telas menores */
+    }
+
+    .btn-conversar .icon-lamp {
+        font-size: 2rem; /* Ajuste o tamanho do ícone em telas menores */
+    }
+
     }
   </style>
 </head>
@@ -150,12 +230,15 @@
   <div class="dashboard-container">
     <!-- Primeira Row: Saudação do usuário + Ícone -->
     <div class="row align-items-center mb-4">
-      <div class="col-md-9">
+      <div class="col-9 col-md-9">
         <img src="/public/logo-EnergIA.png" alt="Logo Energia" class="logo-small">
       </div>
-      <div class="col-md-3 text-right">
-        <div class="icon-user"></div>
+      <div class="col-3 col-md-3 d-flex justify-content-end">
+        <div class="icon-user d-flex align-items-center justify-content-center">
+          <i class="fas fa-user"></i>
+        </div>
       </div>
+      
     </div>
 
     <!-- Segunda Row: Dividida em 3 colunas -->
@@ -163,7 +246,14 @@
       <!-- Coluna 1: Nome e Botão Vamos Conversar -->
       <div class="col-md-4 d-flex flex-column justify-content-end mb-3">
         <div class="greeting">Olá,<br><h3> <%= userName %>!</h3></div>
-        <button class="btn btn-lg btn-custom w-100 mt-3">Vamos Conversar</button>
+        <a href="/chat" class="btn btn-lg btn-conversar w-100 mt-3">
+            <div class="icon-lamp mb-2">
+              <i class="fas fa-lightbulb"></i>
+            </div>
+            <span>Vamos</span>
+            <span>Conversar</span>
+          </a>
+          
       </div>
 
       <!-- Coluna 2: Informações rápidas e Série Histórica -->
