@@ -1,318 +1,169 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💡 EnergIA: Eficiência Energética </title>
+    <title>Chat com Assistentes EnergIA</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap');
-      </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
-        /* Gradiente linear */
-        background: linear-gradient(135deg, #26aa21, #205329);
-        font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
 
-        /* Efeito granulado */
-        background-size: 400% 400%;
-        animation: granular 30s ease infinite;
-    }
-
-    @keyframes granular {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-        
         .chat-container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            margin: 40px auto;
-        }
-
-        h2 {
-            color: #4caf50;
-        }
-
-        .chat-messages {
-            height: 30vh;
-            overflow-y: scroll;
-            margin-bottom: 20px;
-            border: 1px solid #e0e0e0;
+            max-width: 800px;
+            margin: 20px auto;
             padding: 20px;
-            border-radius: 10px;
-            
-        }
-
-        .chat-messages p {
-            margin: 10px 0;
-            padding: 10px;
             border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
         }
 
-        .chat-messages p.user {
-            background-color: #4caf50;
-            color: #ffffff;
+        .chat-window {
+            height: 60vh;
+            overflow-y: auto;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .user-message {
+            justify-content: flex-end;
             text-align: right;
         }
 
-        .chat-messages p.bot {
-            background-color: #e0e0e0;
-            color: #333;
-        }
-        
-        button.btn-primary {
-            background-color: #4caf50;
-            border: none;
+        .assistant-message {
+            justify-content: flex-start;
+            text-align: left;
         }
 
-        button.btn-primary:hover {
-            background-color: #45a049;
+        .message-content {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 1rem;
         }
 
-        button.btn-primary:disabled{
-            background-color: #666;
+        .user-message .message-content {
+            background-color: #e0f7fa;
+            align-self: flex-end;
         }
 
-        @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        .assistant-message .message-content {
+            background-color: #e8eaf6;
         }
 
-        .loader {
-            border: 6px solid #f3f3f3;
-            border-top: 6px solid #4caf50;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
+        .assistant-type {
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
         }
 
-        .header {
-            background-color: #ffffff;
-            padding: 10px 0;
-            border-bottom: 2px solid #4caf50;
-        }
-
-        .btn-group .btn {
-            background-color: #4caf50;
-            border-color: #4caf50;
-            color: #fff;
-        }
-
-        .btn-group .btn:hover {
-            background-color: #45a049;
-            border-color: #45a049;
-        }
-
-        .btn-selected {
-        background-color: #387c44!important;
-        border-color: #387c44!important;
-    }
-
-    .group-title {
-        color: #4caf50; 
-        margin-bottom: 10px; /* Espaçamento abaixo do título */
-        text-align: center; 
-        font-size: 1rem;
-    }
-
-    h2{
-        font-family: 'Lato', sans-serif;
-    }
-
-    .footer {
-            background-color: #ffffff;
-            color: #4caf50;
-            padding: 20px 0;
+        .chat-input-container {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 10px;
         }
 
-        .footer a {
-            color: #4caf50;
-            text-decoration: none;
+        .chat-input {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 10px;
+            border: 1px solid #ccc;
         }
 
-        .footer a:hover {
-            text-decoration: underline;
+        .send-button {
+            background-color: #01EA41;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
 
-        .patrocinadores {
+        .send-button:hover {
+            background-color: #009D17;
         }
-
-    html, body {
-        height: 100%; 
-        margin: 0;
-        padding: 0;
-    }
-
-    .page-container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh; /* Altura total da viewport */
-    }
-
-    .content {
-        flex-grow: 1; /* Ocupa o espaço disponível */
-        overflow-y: auto; /* Adiciona rolagem somente se necessário */
-    }
-    
     </style>
 </head>
 <body>
-    <div class="page-container">
-        <header class="header">
-            <div class="container">
-                <div class="row align-items-center justify-content-between">
-                    
-                    <div class="col-auto">
-                        <img src="/public/LogoEnergIA.png" alt="Logo EnergIA" style="max-height: 100px;">
-                    </div>
-        
-                    <div class="col text-center">
-                        <h3 class="group-title">Escolha o Modelo de Chatbot:</h3>
-                        <div class="btn-group" role="group" aria-label="Opção">
-                            <button type="button" id="gpt3" class="btn btn-secondary btn-selected">GPT 3.5 - Turbo</button>
-                            <button type="button" id="claude" class="btn btn-secondary">Claude-v2</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-        
 
-        <div class="content container">
-            <div class="chat-container">
-                <h2 class="mb-4">💡 EnergIA: Eficiência Energética </h2> 
-                <div class="chat-messages"></div>
-                <form id="chatForm"  method="POST">
-                    <div class="mb-3">
-                        <textarea class="form-control" name="userInput" rows="3" placeholder="Digite sua pergunta aqui..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Enviar</button>
-                </form>
-            </div>
+    <div class="chat-container">
+        <div class="chat-window" id="chat-window">
+            <% if (messages && messages.length > 0) { %>
+              <% messages.forEach(message => { %>
+                <div class="message <%= message.sender === 'user' ? 'user-message' : 'assistant-message' %>">
+                  <div class="message-content">
+                    <%= message.content %>
+                  </div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <p class="text-muted">Nenhuma mensagem no histórico.</p>
+            <% } %>
         </div>
-
-        <footer class="footer">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-6 text-left">
-                        Criado por <a href="https://github.com/PedroThiagoRoque" target="_blank">Pedro Thiago Roque</a>
-                    </div>
-                    <div class="col-md-6 text-right patrocinadores">
-                        <!-- Espaço para os logos dos patrocinadores -->
-                    </div>
-                </div>
-            </div>
-        </footer>
+          
+        <div class="chat-input-container">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Digite sua mensagem..." required>
+            <button id="send-button" class="send-button">Enviar</button>
+        </div>
     </div>
 
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.getElementById('send-button').addEventListener('click', function() {
+            const messageInput = document.getElementById('chat-input');
+            const message = messageInput.value.trim();
 
-<script>
-    $(document).ready(function(){
-        $('.btn-group .btn').click(function(){
-            // Remove a classe 'btn-selected' de todos os botões
-            $('.btn-group .btn').removeClass('btn-selected');
-
-            // Adiciona a classe 'btn-selected' ao botão clicado
-            $(this).addClass('btn-selected');
+            if (message.length > 0) {
+                // Enviar a mensagem para o backend
+                fetch('/chat/message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Atualiza a interface com a resposta do assistente
+                    const chatWindow = document.getElementById('chat-window');
+                    chatWindow.innerHTML += `
+                        <div class="message user-message">
+                            <div class="message-content">${message}</div>
+                        </div>
+                        <div class="message assistant-message">
+                            <div class="message-content">
+                                <div class="assistant-type">${data.assistantType}</div>
+                                ${data.response}
+                            </div>
+                        </div>
+                    `;
+                    messageInput.value = '';
+                    chatWindow.scrollTop = chatWindow.scrollHeight; // Rolagem automática para a última mensagem
+                })
+                .catch(err => console.error('Erro ao enviar mensagem:', err));
+            }
         });
-    });
-</script>
 
-<script>
-    $(document).ready(function(){
-
-
-       
-        endpoint ='/chat/openai';
-        let selectedModel = "gpt";
-
-        document.getElementById('gpt3').addEventListener('click', function() {
-            selectedModel = "gpt";
-            endpoint = "/chat/openai";
-            console.log("gpt"+ endpoint);
+        // Enviar ao pressionar "Enter"
+        document.getElementById('chat-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('send-button').click();
+            }
         });
-
-        document.getElementById('claude').addEventListener('click', function() {
-            selectedModel = "claude";
-            endpoint = "/chat/bedrock";
-            console.log("claude"+ endpoint);
-        });    
-
-
-    $('form').submit(function(event){
-        const userInput = $('textarea[name="userInput"]').val();
-        console.log("você: "+ userInput);
-        
-        event.preventDefault();
-
-        // Adicionar animação de carregamento
-        const loadingDiv = $('<div>').addClass('loader').css('margin', '10px auto');
-        $('.chat-messages').append(loadingDiv);
-
-        $('textarea[name="userInput"]').val(''); // Limpar a textarea
-        const btnSubmit = $(this).find('button[type="submit"]');//desabilita o botão de enviar
-        btnSubmit.prop('disabled', true);
-
-            $.ajax({
-            type: "POST",
-            url: endpoint,
-            data: { userInput: userInput },
-            success: function(data) {
-                
-                if (selectedModel == "gpt") { 
-
-                    $('.loader').remove(); // Remover animação de carregamento
-                    
-                    const messageDiv = $('<p>').addClass('user').text('Você: ' + userInput);
-                    $('.chat-messages').append(messageDiv);
-                    
-                    const botMessageDiv = $('<p>').addClass('bot').text('Bot GPT: ' + data.response);
-                    $('.chat-messages').append(botMessageDiv);
-                    
-                    $('.chat-messages').scrollTop($('.chat-messages')[0].scrollHeight); // Scroll para a última mensagem
-                    btnSubmit.prop('disabled', false);//reativa o botão
-
-                } else if (selectedModel == "claude"){
-
-                    $('.loader').remove(); // Remover animação de carregamento
-                
-                    const messageDiv = $('<p>').addClass('user').text('Você: ' + userInput);
-                    $('.chat-messages').append(messageDiv);
-                    
-                    const botMessageDiv = $('<p>').addClass('bot').text('Bot Claude: ' + data.claudeResponse.completion);
-                    $('.chat-messages').append(botMessageDiv);
-                    //console.log(data);
-                    
-                    $('.chat-messages').scrollTop($('.chat-messages')[0].scrollHeight); // Scroll para a última mensagem
-                    btnSubmit.prop('disabled', false);//reativa o botão
-
-                }
-                
-            },
-            error: function(error) {
-                $('.loader').remove(); // Remover animação de carregamento em caso de erro
-                console.log('Erro:', error);
-                btnSubmit.prop('disabled', false);//reativa o botão
-                }
-            });
- 
-    });
-});
-
-</script>
-
+    </script>
 </body>
 </html>

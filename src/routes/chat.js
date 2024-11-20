@@ -1,71 +1,109 @@
 const express = require('express');
-const path = require('path');
 const router = express.Router();
-
-const bodyParser = require('body-parser');
-require('dotenv').config();
+const Chat = require('../models/chat');
 
 //////////////////////////////////////////////////////
-//Configurações de APIs
+// Inicialização de APIs
 const OpenAI = require('openai');
 require('dotenv').config();
 
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+////////////////////////////////////////////////////////
+async function createAssistants() {
+  const mainAssistant = await openai.beta.assistants.create({
+    name: "Assistente Principal",
+    instructions: "Você é um assistente que responde perguntas gerais sobre eficiência energética e gerencia outros assistentes.",
+    model: "gpt-4",
   });
 
-////////////////////////////////////////////////////
-const { BedrockRuntimeClient, InvokeModelCommand } = require("@aws-sdk/client-bedrock-runtime");
+  const documentAssistant = await openai.beta.assistants.create({
+    name: "Assistente de Documentos",
+    instructions: "Você é responsável por pesquisar em documentos fornecidos pelo usuário e responder perguntas baseadas nos documentos.",
+    model: "gpt-4",
+  });
 
-const cliente = new BedrockRuntimeClient({ 
-    region: "us-east-1",
-        model: "claude-2",//apiVersion: '2023-09-30',
-        credentials:{
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? "",
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? ""
-        } 
-});
-///////////////////////////////////////////////////////
+  /*const consumptionAssistant = await openai.beta.assistants.create({
+    name: "Assistente de Consumo",
+    instructions: "Você fornece informações sobre consumo energético usando dados do banco de dados do usuário.",
+    model: "gpt-4",
+    tools: [{ type: "function" }],
+  });*/
 
-//Tela de chat padrão
-router.get('/', (req,res) => { 
-   res.render('chat', {response: ''});
-});
-
-///////////////////////////////////////
-
-//Rotas OPENAI
-
-router.post('/openai', async (req, res) => {
-    const userInput = req.body.userInput;
-
-    const openAiResponse = await getOpenAiResponse(userInput);
-
-    res.json({ response: openAiResponse.choices[0].message.content });
-});
-
-async function getOpenAiResponse(prompt) {
-    try {
-        const response = await openai.chat.completions.create({
-            messages: [
-                { role: "system", content: "Você é um ajudante de eficiência energética, sua missão é guiar os usuários até o entendimento da importância da eficiência energética. Explique os conceitos e demonstre ações práticas que possam contribuir. Seja paciente, descomplicado e cuidadoso nas explicações. Crie respostas breves sempre que possivel, mantenha o tema da conversa sobre eficiência energética. Para temas que não forem sobre eficiência energética responda que não sabe responder e direcione para algo sobre eficiência energética." }, //guia inicial da conversação com o modelo
-                { role: "user", content: prompt } //prompt do usuário
-            ],
-            model: "gpt-3.5-turbo",
-        });
-        console.log("você: "+ prompt);
-        return response;
-    } catch (error) {
-        console.error('Erro ao comunicar com a OpenAI API:', error);
-        return { choices: [{ message: { content: 'Desculpe, não foi possível obter uma resposta. :C' } }] };
-    }
+  return { mainAssistant, documentAssistant};
 }
 
-///////////////////////////////////////////
 
-// src/routes/chat.js
-const Chat = require('../models/Chat');
-const User = require('../models/User');
+async function createThread() {
+  try {
+    const thread = await openai.beta.threads.create();
+    if (!thread || !thread.id) {
+      throw new Error("Falha ao criar uma nova thread.");
+    }
+    console.log("tó2", thread);
+    return thread.id;
+  } catch (err) {
+    console.error('Erro ao criar a thread:', err);
+    throw err;
+  }
+}
+
+
+
+async function addMessageToThread(threadId, role, content) {
+  const message = await openai.beta.threads.messages.create(threadId, {
+    role: role,
+    content: content,
+  });
+  return message;
+}
+
+
+async function routeMessage(userInput, assistants, threadId) {
+  let assistant;
+
+  if (userInput.includes('documento')) {
+    assistant = assistants.documentAssistant;
+  } else if (userInput.includes('consumo')) {
+    //assistant = assistants.consumptionAssistant;
+  } else {
+    assistant = assistants.mainAssistant;
+  }
+
+  await addMessageToThread(threadId, "user", userInput);
+  return runAssistantOnThread(assistant.id, threadId);
+}
+
+
+
+async function runAssistantOnThread(assistantId, threadId) {
+  const run = await openai.beta.threads.runs.create(
+    threadId,
+    {assistant_id: assistantId}
+  );
+  return run;
+}
+
+
+//rotas
+router.get('/', async (req, res) => {
+  const userId = req.session.userId;
+
+  if (!userId) {
+    return res.status(401).send('Usuário não autenticado');
+  }
+
+  try {
+    let chat = await Chat.findOne({ userId });
+    let messages = chat ? chat.messages : [];
+    res.render('chat', { messages });
+  } catch (err) {
+    console.error('Erro ao buscar histórico do chat:', err);
+    res.status(500).send('Erro ao carregar o chat');
+  }
+});
 
 router.post('/message', async (req, res) => {
   const { message } = req.body;
@@ -76,30 +114,49 @@ router.post('/message', async (req, res) => {
   }
 
   try {
+    // Busca ou cria um chat para o usuário
     let chat = await Chat.findOne({ userId });
+    let threadId;
 
     if (!chat) {
-      chat = await Chat.create({ userId, messages: [] });
+      // Cria uma nova thread se não existir
+      threadId = await createThread();
+      chat = new Chat({ userId, threadId, messages: [] });
+      await chat.save();
+    } else {
+      threadId = chat.threadId;
     }
+    console.log("tó3", threadId);
+    // Adiciona a mensagem do usuário à thread
+    await addMessageToThread(threadId, "user", message);
 
-    // Adicionar a mensagem do usuário
-    chat.messages.push({ sender: 'user', message });
-    
-    // Aqui você processaria a resposta do bot (por exemplo, usando alguma API ou lógica local)
-    const botResponse = "Esta é a resposta do bot";  // Substitua pela lógica de resposta real
+    // Seleciona um assistente adequado
+    const assistants = await createAssistants();
+    const run = await routeMessage(message, assistants, threadId);
 
-    // Adicionar a resposta do bot
-    chat.messages.push({ sender: 'bot', message: botResponse });
-
-    // Salvar o chat atualizado
+    // Adiciona uma mensagem do usuário ao histórico
+    chat.messages.push({ sender: "user", content: message });
     await chat.save();
 
-    res.send({ response: botResponse });
+    // Simula uma resposta do assistente (neste caso, uma resposta simples)
+    const assistantResponse = "Resposta simulada do assistente.";
+
+    // Adiciona a resposta do assistente ao histórico de mensagens no BD
+    chat.messages.push({ sender: "assistant", content: assistantResponse });
+    await chat.save();
+
+    res.json({
+      response: assistantResponse,
+      assistantType: "Assistente Principal",
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao salvar o chat');
+    console.error('Erro ao processar a mensagem:', err);
+    res.status(500).send('Erro ao processar a mensagem');
   }
 });
 
+
+//////////////////////////////////////////////////////////
 
 module.exports = router;
