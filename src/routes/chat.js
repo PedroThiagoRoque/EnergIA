@@ -24,7 +24,7 @@ async function createAssistantIfNeeded() {
   const assistant = await openai.beta.assistants.create({
     name: "EnergIA Assistant",
     instructions: "Você é um assistente especializado em responder perguntas sobre eficiência energética.",
-    model: "gpt-4",
+    model: "gpt-4o-mini",
   });
 
   console.log("Novo assistente criado:", assistant);
