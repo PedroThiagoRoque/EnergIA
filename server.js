@@ -21,7 +21,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
-const port = 80;
+const port = 3000;
 
 app.use(express.json());
 
