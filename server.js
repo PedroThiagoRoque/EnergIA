@@ -83,7 +83,7 @@ app.get('/editor', requireLogin, (req, res) => {
 app.use(authRouter);
 
 // Dashboard
-app.get('/dashboard', (req, res) => {
+app.get('/dashboard', requireLogin, (req, res) => {
   // Obter a temperatura de Pelotas
   getTemperature((err, temperature) => {
     if (err) {
