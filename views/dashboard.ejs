@@ -224,6 +224,31 @@
     }
 
     }
+    .user-dropdown-menu {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  background: #222;
+  border: 1px solid #fff;
+  border-radius: 8px;
+  min-width: 120px;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.user-dropdown-menu .dropdown-item {
+  color: #fff;
+  padding: 10px 18px;
+  display: block;
+  text-decoration: none;
+  border-bottom: 1px solid #444;
+  transition: background 0.2s;
+}
+.user-dropdown-menu .dropdown-item:last-child {
+  border-bottom: none;
+}
+.user-dropdown-menu .dropdown-item:hover {
+  background: #444;
+}
   </style>
 </head>
 <body>
@@ -233,9 +258,16 @@
       <div class="col-9 col-md-9">
         <img src="/public/logo-EnergIA.png" alt="Logo Energia" class="logo-small">
       </div>
-      <div class="col-3 col-md-3 d-flex justify-content-end">
-        <div class="icon-user d-flex align-items-center justify-content-center">
+      <div class="col-3 col-md-3 d-flex justify-content-end position-relative">
+        <div class="icon-user d-flex align-items-center justify-content-center" id="userMenuBtn" style="cursor:pointer;">
           <i class="fas fa-user"></i>
+          <span class="burger-lines ml-2 d-md-none">
+            <i class="fas fa-bars"></i>
+          </span>
+        </div>
+        <!-- Dropdown Menu -->
+        <div id="userDropdown" class="user-dropdown-menu" style="display:none;">
+          <a href="/logout" class="dropdown-item">Logoff</a>
         </div>
       </div>
       
@@ -321,5 +353,17 @@
       <p>LABCEE / UFPel - 2024</p>
     </footer>
   </div>
+
+  <script>
+  const userMenuBtn = document.getElementById('userMenuBtn');
+  const userDropdown = document.getElementById('userDropdown');
+  document.addEventListener('click', function(event) {
+    if (userMenuBtn.contains(event.target)) {
+      userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+    } else {
+      userDropdown.style.display = 'none';
+    }
+  });
+</script>
 </body>
 </html>

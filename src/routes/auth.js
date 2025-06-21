@@ -48,4 +48,17 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Rota de Logout
+router.get('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Erro ao encerrar sessão:', err);
+      // Opcional: mostrar mensagem de erro ao usuário
+      return res.redirect('/dashboard');
+    }
+    res.clearCookie('connect.sid'); // Limpa o cookie da sessão
+    res.redirect('/login');
+  });
+});
+
 module.exports = router;
