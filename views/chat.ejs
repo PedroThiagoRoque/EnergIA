@@ -54,12 +54,12 @@
         }
 
         .user-message .message-content {
-            background-color: #e0f7fa;
+            background-color: #9af79f;
             align-self: flex-end;
         }
 
         .assistant-message .message-content {
-            background-color: #e8eaf6;
+            background-color: #cad6cc;
         }
 
         .assistant-type {
@@ -125,8 +125,29 @@
         document.getElementById('send-button').addEventListener('click', function() {
             const messageInput = document.getElementById('chat-input');
             const message = messageInput.value.trim();
+            const chatWindow = document.getElementById('chat-window');
 
             if (message.length > 0) {
+                // Exibe imediatamente a mensagem do usuário
+                chatWindow.innerHTML += `
+                    <div class="message user-message">
+                        <div class="message-content">${message}</div>
+                    </div>
+                `;
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                messageInput.value = '';
+
+                // Adiciona balão de loading do assistente
+                const spinnerId = 'spinner-' + Date.now();
+                chatWindow.innerHTML += `
+                    <div class="message assistant-message" id="${spinnerId}">
+                        <div class="message-content" style="display:flex;align-items:center;gap:10px;">
+                            <img src="/public/load.gif" alt="Carregando..." style="width:50px;height:50px;">
+                        </div>
+                    </div>
+                `;
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+
                 // Enviar a mensagem para o backend
                 fetch('/chat/message', {
                     method: 'POST',
@@ -137,23 +158,30 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Atualiza a interface com a resposta do assistente
-                    const chatWindow = document.getElementById('chat-window');
-                    chatWindow.innerHTML += `
-                        <div class="message user-message">
-                            <div class="message-content">${message}</div>
-                        </div>
-                        <div class="message assistant-message">
+                    // Substitui o balão de loading pela resposta do assistente
+                    const spinnerDiv = document.getElementById(spinnerId);
+                    if (spinnerDiv) {
+                        spinnerDiv.innerHTML = `
                             <div class="message-content">
                                 <div class="assistant-type">${data.assistantType}</div>
                                 ${data.response}
                             </div>
-                        </div>
-                    `;
-                    messageInput.value = '';
-                    chatWindow.scrollTop = chatWindow.scrollHeight; // Rolagem automática para a última mensagem
+                        `;
+                    }
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
                 })
-                .catch(err => console.error('Erro ao enviar mensagem:', err));
+                .catch(err => {
+                    // Em caso de erro, remove o spinner e mostra mensagem de erro
+                    const spinnerDiv = document.getElementById(spinnerId);
+                    if (spinnerDiv) {
+                        spinnerDiv.innerHTML = `
+                            <div class="message-content text-danger">
+                                Erro ao enviar mensagem. Tente novamente.
+                            </div>
+                        `;
+                    }
+                    console.error('Erro ao enviar mensagem:', err);
+                });
             }
         });
 
@@ -162,6 +190,7 @@
             if (e.key === 'Enter') {
                 e.preventDefault();
                 document.getElementById('send-button').click();
+                this.value = '';
             }
         });
     </script>
