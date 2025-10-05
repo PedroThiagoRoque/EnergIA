@@ -294,6 +294,9 @@
           <div class="temp-card text-center">
             <h5>Tempo</h5>
             <h2><%= temperature %>ºC</h2>
+            <% if (weatherIcon) { %>
+              <img src="https://openweathermap.org/img/wn/<%= weatherIcon %>@2x.png" alt="Ícone do tempo" style="width:80px; height:80px;">
+            <% } %>
           </div>
           <div class="consumption-card text-center ml-3">
             <h5>Último Consumo</h5>

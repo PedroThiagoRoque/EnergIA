@@ -34,18 +34,13 @@ function getTemperature(callback) {
 
   https.get(url, (response) => {
     let data = '';
-
-    // Receber os chunks de dados
-    response.on('data', (chunk) => {
-      data += chunk;
-    });
-
-    // Quando todos os dados forem recebidos
+    response.on('data', (chunk) => { data += chunk; });
     response.on('end', () => {
       if (response.statusCode === 200) {
         const weatherData = JSON.parse(data);
         const temperature = Math.trunc(weatherData.main.temp);
-        callback(null, temperature);
+        const icon = weatherData.weather && weatherData.weather[0] ? weatherData.weather[0].icon : null;
+        callback(null, { temperature, icon });
       } else {
         callback(`Erro ao obter temperatura: ${response.statusCode} - ${data}`, null);
       }
@@ -84,17 +79,17 @@ app.use(authRouter);
 
 // Dashboard
 app.get('/dashboard', requireLogin, (req, res) => {
-  // Obter a temperatura de Pelotas
-  getTemperature((err, temperature) => {
-    if (err) {
-      console.error(err);
-      temperature = 'N/A';
+  getTemperature((err, weather) => {
+    let temperature = '';
+    let weatherIcon = '';
+    if (!err && weather) {
+      temperature = weather.temperature;
+      weatherIcon = weather.icon;
     }
-
-    // Renderizar o dashboard com a temperatura obtida
     res.render('dashboard', {
       userName: req.session.userName,
-      temperature: temperature // Passar temperatura para a view
+      temperature,
+      weatherIcon
     });
   });
 });
