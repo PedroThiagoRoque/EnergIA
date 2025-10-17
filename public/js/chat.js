@@ -1,3 +1,13 @@
+function formatTimestamp(date) {
+    return date.toLocaleString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit'
+    }).replace(',', ' -');
+}
+
 function nl2br(str) {
             return str.replace(/\n/g, '<br>');
         }
@@ -19,11 +29,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (message.length > 0) {
             // Exibe imediatamente a mensagem do usuário
+            const userTimestamp = formatTimestamp(new Date());
             chatWindow.innerHTML += `
                 <div class="message user-message">
                     <div class="message-content">
                         <div class="assistant-type">Você</div>
                         ${message}
+                        <div class="message-timestamp">
+                            ${userTimestamp}
+                        </div>
                     </div>
                 </div>
             `;
@@ -52,12 +66,16 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 // Substitui o balão de loading pela resposta do assistente
+                const assistantTimestamp = formatTimestamp(new Date());
                 const spinnerDiv = document.getElementById(spinnerId);
                 if (spinnerDiv) {
                     spinnerDiv.innerHTML = `
                         <div class="message-content">
                             <div class="assistant-type">${data.assistantType}</div>
                             ${formatResponse(data.response)}
+                            <div class="message-timestamp">
+                                ${assistantTimestamp}
+                            </div>
                         </div>
                     `;
                 }

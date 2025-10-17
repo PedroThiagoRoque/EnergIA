@@ -98,6 +98,13 @@
         .send-button:hover {
             background-color: #009D17;
         }
+
+        .message-timestamp {
+            font-size: 0.75rem !important;
+            color: #888 !important;
+            margin-top: 5px !important;
+            text-align: right !important;
+        }
     </style>
 </head>
 <body>
@@ -116,6 +123,17 @@
                       <%- message.content
                             .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
                             .replace(/\n/g, '<br>') %>
+                    <% } %>
+                    <% if (message.timestamp) { %>
+                      <div class="message-timestamp">
+                        <%= new Date(message.timestamp).toLocaleString('pt-BR', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: '2-digit'
+                        }).replace(',', ' -') %>
+                      </div>
                     <% } %>
                   </div>
                 </div>
