@@ -19,6 +19,22 @@ function formatResponse(str) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Adiciona CSS para o nome do agente se não existir
+    if (!document.querySelector('style[data-agent-name]')) {
+        const style = document.createElement('style');
+        style.setAttribute('data-agent-name', 'true');
+        style.textContent = `
+            .agent-name {
+                font-size: 0.7rem !important;
+                color: #aaa !important;
+                margin-top: 3px !important;
+                text-align: left !important;
+                font-style: italic;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
     const chatInput = document.getElementById('chat-input');
     const sendButton = document.getElementById('send-button');
 
@@ -69,10 +85,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const assistantTimestamp = formatTimestamp(new Date());
                 const spinnerDiv = document.getElementById(spinnerId);
                 if (spinnerDiv) {
+                    const agentNameHtml = data.assistantName ? `<div class="agent-name">~ ${data.assistantName}</div>` : '';
                     spinnerDiv.innerHTML = `
                         <div class="message-content">
                             <div class="assistant-type">${data.assistantType}</div>
                             ${formatResponse(data.response)}
+                            ${agentNameHtml}
                             <div class="message-timestamp">
                                 ${assistantTimestamp}
                             </div>

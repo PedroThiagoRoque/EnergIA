@@ -105,6 +105,14 @@
             margin-top: 5px !important;
             text-align: right !important;
         }
+
+        .agent-name {
+            font-size: 0.7rem !important;
+            color: #aaa !important;
+            margin-top: 3px !important;
+            text-align: left !important;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -123,6 +131,9 @@
                       <%- message.content
                             .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
                             .replace(/\n/g, '<br>') %>
+                      <% if (message.assistantName) { %>
+                        <div class="agent-name">~ <%= message.assistantName %></div>
+                      <% } %>
                     <% } %>
                     <% if (message.timestamp) { %>
                       <div class="message-timestamp">
