@@ -580,8 +580,20 @@ async function atualizarDadosUso(userId, novaInteracao, inicioSessao) {
       ultimaInteracao: agora
     };
 
-    // Calcula o novo perfil baseado nos dados de uso
-    const novoPerfilCalculado = await calculaPerfilUsuario(dadosUsoAtualizados);
+    // Calcula o novo perfil baseado nos dados de uso — somente 1 vez por dia para poupar recursos
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+  const ultimoCalcExistente = user.dadosUso && user.dadosUso.ultimoCalculoPerfil ? new Date(user.dadosUso.ultimoCalculoPerfil) : null;
+
+    let novoPerfilCalculado;
+    // Recalcula se: não houve cálculo antes, passou mais de 24h desde o último cálculo, ou não existe perfil atual
+    if (!ultimoCalcExistente || (agora - ultimoCalcExistente) > ONE_DAY_MS || !user.perfilUsuario) {
+      novoPerfilCalculado = await calculaPerfilUsuario(dadosUsoAtualizados);
+      // regista timestamp do último cálculo no objeto de dados de uso para persistir
+      dadosUsoAtualizados.ultimoCalculoPerfil = agora;
+    } else {
+      // reutiliza o perfil atual do usuário sem chamar a API
+      novoPerfilCalculado = user.perfilUsuario || 'Intermediário';
+    }
     
     // Constrói resumo textual para compatibilidade
     const temasTexto = temasAtualizados.length > 0 ? `; interessa-se por ${temasAtualizados.join(', ')}` : '';
@@ -887,13 +899,22 @@ router.post('/engajamento', async (req, res) => {
       'dadosUso.engajamentoDesafios': novoEngajamento
     });
 
-    // Recalcula perfil após mudança no engajamento
+    // Recalcula perfil após mudança no engajamento apenas se necessário (1 vez por dia)
     const userAtualizado = await User.findById(userId);
-    const novoPerfilCalculado = await calculaPerfilUsuario(userAtualizado.dadosUso);
-    
-    await User.findByIdAndUpdate(userId, {
-      perfilUsuario: novoPerfilCalculado
-    });
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    const ultimoCalc = userAtualizado.dadosUso && userAtualizado.dadosUso.ultimoCalculoPerfil ? new Date(userAtualizado.dadosUso.ultimoCalculoPerfil) : null;
+    const agora = new Date();
+
+    let novoPerfilCalculado = userAtualizado.perfilUsuario || 'Intermediário';
+    if (!ultimoCalc || (agora - ultimoCalc) > ONE_DAY_MS || !userAtualizado.perfilUsuario) {
+      novoPerfilCalculado = await calculaPerfilUsuario(userAtualizado.dadosUso);
+      await User.findByIdAndUpdate(userId, {
+        perfilUsuario: novoPerfilCalculado,
+        'dadosUso.ultimoCalculoPerfil': agora
+      });
+    } else {
+      // Mantém o perfil atual sem nova chamada à API
+    }
 
     res.json({ 
       success: true, 
@@ -962,60 +983,5 @@ router.get('/dica-dia', async (req, res) => {
   }
 });
 
-// Rota para teste do RAG direto no assistente
-router.post('/test-rag', async (req, res) => {
-  const { pergunta } = req.body;
-  
-  if (!pergunta) {
-    return res.status(400).json({ error: 'Pergunta é obrigatória' });
-  }
-
-  try {
-    console.log('🧪 Teste RAG direto iniciado para:', pergunta);
-    
-    // Gera contexto otimizado para o assistente principal
-    const contextoOtimizado = combinarContextos({
-      ragContext: `Consulte documentação especializada sobre: ${pergunta}`,
-      userProfile: { perfilUsuario: 'Intermediário', resumoUso: 'Teste RAG' },
-      weatherData: req.session.weatherData,
-      pergunta
-    });
-    
-    let responseAssistente = null;
-      
-    // Testa resposta direta do assistente principal com RAG
-    try {
-      const threadId = await createThread();
-      const mainAssistantId = 'asst_oHXYE4aMJkK9xUmX5pZGfgP0';
-      
-      const testPrompt = `TESTE RAG: ${pergunta}
-      
-Use a documentação especializada para responder com precisão técnica.`;
-      
-      responseAssistente = await addMessageAndRunAssistant(threadId, testPrompt, mainAssistantId);
-    } catch (assistantError) {
-      console.error('Erro ao testar assistente principal:', assistantError);
-      responseAssistente = 'Erro ao testar assistente';
-    }
-    
-    res.json({
-      success: true,
-      pergunta,
-      contextoOtimizado,
-      responseAssistentePrincipal: responseAssistente,
-      assistenteUsado: 'asst_oHXYE4aMJkK9xUmX5pZGfgP0 (Principal com RAG nativo)',
-      otimizacao: 'RAG sempre disponível - integrado diretamente ao assistente principal',
-      timestamp: new Date().toISOString()
-    });
-    
-  } catch (err) {
-    console.error('Erro no teste RAG direto:', err);
-    res.status(500).json({
-      success: false,
-      error: 'Erro no teste RAG direto',
-      message: err.message
-    });
-  }
-});
 
 module.exports = router;
