@@ -12,6 +12,25 @@ const openai = new OpenAI({
 
 const assistantCache = {};
 const VECTOR_STORE_ID = 'vs_wYuw3eV3ei1mq60sEUJv00zG';
+const DailyData = require('../models/DailyData');
+
+// utilitário de data
+const todayString = (d = new Date()) => d.toISOString().slice(0, 10);
+
+// Busca dados do dia no BD
+async function getDailyData(dateStr) {
+  const date = dateStr || todayString();
+  const doc = await DailyData.findOne({ date }).lean();
+  return doc;
+}
+
+// Salva ou atualiza dados do dia
+async function saveOrUpdateDailyData({ date, dicaDia, temas }) {
+  const day = date || todayString();
+  const payload = { date: day, dicaDia: dicaDia || '', temas: temas || [] };
+  const updated = await DailyData.findOneAndUpdate({ date: day }, payload, { upsert: true, new: true, setDefaultsOnInsert: true });
+  return updated;
+}
 
 /**
  * Combina contexto RAG com outros contextos de forma otimizada
@@ -219,6 +238,55 @@ const getDicaDia = async () => {
   }
 };
 
+// Gera array de 10 temas usando o assistente RAG (usa createThread / addMessageAndRunAssistant)
+async function generateTemas() {
+  try {
+    const mainAssistantId = 'asst_oHXYE4aMJkK9xUmX5pZGfgP0';
+    const threadId = await createThread();
+    const prompt = `Gere uma lista de 10 temas curtos (frases de 2-6 palavras) sobre eficiência energética, cada tema separado por linha. Seja prático e específico (ex.: 'Iluminação LED por cômodo'). Retorne somente as linhas, sem enumeração.`;
+    const raw = await addMessageAndRunAssistant(threadId, prompt, mainAssistantId);
+    const lines = (raw || '')
+      .split(/\r?\n/)
+      .map(l => l.replace(/^\s*[\-\d\.\)\:]+\s*/, '').trim())
+      .filter(l => l.length > 0);
+
+    if (lines.length < 10) {
+      const commaParts = raw.split(',').map(p => p.trim()).filter(Boolean);
+      if (commaParts.length >= 10) return commaParts.slice(0, 10);
+    }
+
+    if (lines.length >= 10) return lines.slice(0, 10);
+
+    // fallback
+    return [
+      'Iluminação por zonas',
+      'Uso racional do ar-condicionado',
+      'Aquecimento solar passivo',
+      'Controle de standby de aparelhos',
+      'Separação de cargas elétricas',
+      'Programação de horário de chuveiro',
+      'Ventilação cruzada na residência',
+      'Isolamento térmico de janelas',
+      'Manutenção da geladeira',
+      'Uso eficiente de eletrodomésticos'
+    ];
+  } catch (err) {
+    console.error('Erro ao gerar temas:', err);
+    return [
+      'Iluminação por zonas',
+      'Uso racional do ar-condicionado',
+      'Aquecimento solar passivo',
+      'Controle de standby de aparelhos',
+      'Separação de cargas elétricas',
+      'Programação de horário de chuveiro',
+      'Ventilação cruzada na residência',
+      'Isolamento térmico de janelas',
+      'Manutenção da geladeira',
+      'Uso eficiente de eletrodomésticos'
+    ];
+  }
+}
+
 // Função para analisar complexidade da pergunta
 const analisarComplexidadePergunta = (pergunta) => {
   const texto = pergunta.toLowerCase();
@@ -326,9 +394,25 @@ async function getOrCreateAssistant({ name, instructions, model, userData, pergu
   let finalInstructions = instructions;
   if (userData) {
     const pilaresAtivos = determinePilaresAtivos(pergunta || '');
-    const dicaDia = await getDicaDia();
+    // Busca dica do dia no BD (melhora performance; fallback para gerar se não existir)
+    let dicaDia = null;
+    try {
+      const daily = await getDailyData();
+      dicaDia = daily && daily.dicaDia ? daily.dicaDia : null;
+      if (!dicaDia) {
+        // gera dica e temas, salva no BD
+        const generated = await getDicaDia();
+        const temas = await generateTemas();
+        const saved = await saveOrUpdateDailyData({ date: todayString(), dicaDia: generated, temas });
+        dicaDia = saved.dicaDia;
+      }
+    } catch (err) {
+      console.error('Erro ao obter dica do dia (BD) - fallback para gerar:', err);
+      dicaDia = await getDicaDia();
+    }
+
     const climaContext = getClimaticContext(sessionWeatherData);
-    
+
     finalInstructions = buildPersonalizedPrompt({
       perfilUsuario: userData.perfilUsuario,
       pilaresAtivos,
@@ -980,6 +1064,41 @@ router.get('/dica-dia', async (req, res) => {
       error: 'Erro ao gerar dica do dia',
       message: err.message 
     });
+  }
+});
+
+// Retorna 3 icebreakers aleatórios do dia
+router.get('/daily/icebreakers', async (req, res) => {
+  try {
+    const daily = await getDailyData();
+    if (!daily || !Array.isArray(daily.temas) || daily.temas.length === 0) return res.json({ temas: [] });
+    const temas = daily.temas.slice();
+    for (let i = temas.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [temas[i], temas[j]] = [temas[j], temas[i]];
+    }
+    return res.json({ temas: temas.slice(0, 3) });
+  } catch (err) {
+    console.error('Erro /daily/icebreakers:', err);
+    return res.status(500).json({ temas: [] });
+  }
+});
+
+// Gera/atualiza os dados do dia (dica + temas) — endpoint protegido por sessão
+router.post('/daily/generate', async (req, res) => {
+  try {
+    const userId = req.session && req.session.userId;
+    if (!userId) return res.status(401).send('Usuário não autenticado');
+
+    const dicaGerada = await getDicaDia();
+    const temasGerados = await generateTemas();
+
+    const saved = await saveOrUpdateDailyData({ date: todayString(), dicaDia: dicaGerada, temas: temasGerados.slice(0, 10) });
+
+    return res.json({ ok: true, daily: saved });
+  } catch (err) {
+    console.error('Erro /daily/generate:', err);
+    res.status(500).json({ error: 'Erro ao gerar dados do dia' });
   }
 });
 

@@ -154,10 +154,57 @@
             <% } %>
         </div>
           
+        <!-- Icebreakers: sugestões rápidas do dia -->
+        <div id="icebreakers-container" style="margin-bottom:8px;">
+          <div style="font-weight:600; margin-bottom:6px;">Começar por:</div>
+          <div id="icebreakers" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+        </div>
+
         <div class="chat-input-container">
             <input type="text" id="chat-input" class="chat-input" placeholder="Digite sua mensagem..." required>
             <button id="send-button" class="send-button">Enviar</button>
         </div>
+
+        <script>
+          (function () {
+            async function loadIcebreakers() {
+              try {
+                const res = await fetch('/chat/daily/icebreakers');
+                if (!res.ok) throw new Error('Erro carregando icebreakers');
+                const body = await res.json();
+                const temas = body.temas || [];
+                const cont = document.getElementById('icebreakers');
+                cont.innerHTML = '';
+                if (temas.length === 0) {
+                  cont.innerHTML = '<span style="opacity:.7">Sem sugestões por enquanto</span>';
+                  return;
+                }
+                temas.forEach((t) => {
+                  const btn = document.createElement('button');
+                  btn.type = 'button';
+                  btn.className = 'icebreaker-btn btn btn-light btn-sm';
+                  btn.style.borderRadius = '20px';
+                  btn.textContent = t;
+                  btn.addEventListener('click', () => onIcebreakerClick(t));
+                  cont.appendChild(btn);
+                });
+              } catch (err) {
+                console.error('loadIcebreakers err', err);
+              }
+            }
+
+            function onIcebreakerClick(text) {
+              const field = document.getElementById('chat-input');
+              if (!field) { alert('Campo de mensagem não encontrado.'); return; }
+              field.value = text;
+              field.dispatchEvent(new Event('input', { bubbles: true }));
+              const sendBtn = document.getElementById('send-button');
+              if (sendBtn) sendBtn.click();
+            }
+
+            document.addEventListener('DOMContentLoaded', loadIcebreakers);
+          })();
+        </script>
     </div>
 
 </body>
