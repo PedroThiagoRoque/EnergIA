@@ -9,13 +9,15 @@ function formatTimestamp(date) {
 }
 
 function nl2br(str) {
-            return str.replace(/\n/g, '<br>');
-        }
+    const s = (str == null) ? '' : String(str);
+    return s.replace(/\n/g, '<br>');
+}
 
 function formatResponse(str) {
-            return str
-                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-                .replace(/\n/g, '<br>');
+    const s = (str == null) ? '' : String(str);
+    return s
+        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+        .replace(/\n/g, '<br>');
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -85,11 +87,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 const assistantTimestamp = formatTimestamp(new Date());
                 const spinnerDiv = document.getElementById(spinnerId);
                 if (spinnerDiv) {
-                    const agentNameHtml = data.assistantName ? `<div class="agent-name">~ ${data.assistantName}</div>` : '';
+                    const assistantType = data.assistantType || data.assistant || 'Assistente';
+                    const assistantName = data.assistantName || data.assistant || '';
+                    const agentNameHtml = assistantName ? `<div class="agent-name">~ ${assistantName}</div>` : '';
+                    const responseText = (data.response != null) ? data.response : (data.reply != null ? data.reply : '');
                     spinnerDiv.innerHTML = `
                         <div class="message-content">
-                            <div class="assistant-type">${data.assistantType}</div>
-                            ${formatResponse(data.response)}
+                            <div class="assistant-type">${assistantType}</div>
+                            ${formatResponse(responseText)}
                             ${agentNameHtml}
                             <div class="message-timestamp">
                                 ${assistantTimestamp}

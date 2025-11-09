@@ -14,198 +14,129 @@
             font-family: Arial, sans-serif;
             color: #333;
         }
-
-        .chat-container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            background-color: #fff;
-        }
-
-        .chat-window {
-            height: 60vh;
-            overflow-y: auto;
-            border-bottom: 2px solid #e0e0e0;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .message {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .user-message {
-            justify-content: flex-end;
-            text-align: right;
-        }
-
-        .assistant-message {
-            justify-content: flex-start;
-            text-align: left;
-        }
-
-        .message-content {
-            max-width: 70%;
-            padding: 10px 15px;
-            border-radius: 15px;
-            font-size: 1rem;
-        }
-
-        .user-message .message-content {
-            background-color: #9af79f;
-            align-self: flex-end;
-        }
-
-        .assistant-message .message-content {
-            background-color: #cad6cc;
-        }
-
-        .assistant-type {
-            font-weight: bold;
-            font-size: 0.85rem;
-            margin-bottom: 5px;
-        }
-
-        .chat-input-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .chat-input {
-            flex-grow: 1;
-            padding: 10px;
-            font-size: 1rem;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-        }
-
-        .send-button {
-            background-color: #01EA41;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            color: #fff;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .send-button:hover {
-            background-color: #009D17;
-        }
-
-        .message-timestamp {
-            font-size: 0.75rem !important;
-            color: #888 !important;
-            margin-top: 5px !important;
-            text-align: right !important;
-        }
-
-        .agent-name {
-            font-size: 0.7rem !important;
-            color: #aaa !important;
-            margin-top: 3px !important;
-            text-align: left !important;
-            font-style: italic;
-        }
+        .chat-container { max-width: 800px; margin: 20px auto; padding: 20px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,.1); background-color: #fff; }
+        .chat-window { height: 60vh; overflow-y: auto; border-bottom: 2px solid #e0e0e0; padding: 15px; margin-bottom: 20px; }
+        .message { display: flex; align-items: flex-start; margin-bottom: 15px; }
+        .user-message { justify-content: flex-end; text-align: right; }
+        .assistant-message { justify-content: flex-start; text-align: left; }
+        .message-content { max-width: 70%; padding: 10px 15px; border-radius: 15px; font-size: 1rem; }
+        .user-message .message-content { background-color: #9af79f; align-self: flex-end; }
+        .assistant-message .message-content { background-color: #cad6cc; }
+        .assistant-type { font-weight: bold; font-size: 0.85rem; margin-bottom: 5px; }
+        .chat-input-container { display: flex; align-items: center; gap: 10px; }
+        .chat-input { flex-grow: 1; padding: 10px; font-size: 1rem; border-radius: 10px; border: 1px solid #ccc; }
+        .send-button { background-color: #01EA41; border: none; padding: 10px 20px; border-radius: 10px; color: #fff; font-weight: bold; cursor: pointer; transition: background-color .3s; }
+        .send-button:hover { background-color: #009D17; }
+        .message-timestamp { font-size: .75rem !important; color: #888 !important; margin-top: 5px !important; text-align: right !important; }
+        .agent-name { font-size: .7rem !important; color: #aaa !important; margin-top: 3px !important; text-align: left !important; font-style: italic; }
     </style>
 </head>
 <body>
 
-    <div class="chat-container">
-        <div class="chat-window" id="chat-window">
-            <% if (messages && messages.length > 0) { %>
-              <% messages.forEach(message => { %>
-                <div class="message <%= message.sender === 'user' ? 'user-message' : 'assistant-message' %>">
-                  <div class="message-content">
-                    <% if (message.sender === 'user') { %>
-                      <div class="assistant-type">Você</div>
-                      <%= message.content.replace(/\n/g, '<br>') %>
-                    <% } else { %>
-                      <div class="assistant-type"><%= message.assistantType || 'Assistente' %></div>
-                      <%- message.content
-                            .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-                            .replace(/\n/g, '<br>') %>
-                      <% if (message.assistantName) { %>
-                        <div class="agent-name">~ <%= message.assistantName %></div>
-                      <% } %>
-                    <% } %>
-                    <% if (message.timestamp) { %>
-                      <div class="message-timestamp">
-                        <%= new Date(message.timestamp).toLocaleString('pt-BR', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: '2-digit'
-                        }).replace(',', ' -') %>
-                      </div>
-                    <% } %>
-                  </div>
-                </div>
-              <% }) %>
+<div class="chat-container">
+  <div class="chat-window" id="chat-window">
+    <% if (messages && messages.length > 0) { %>
+      <% messages.forEach(message => { 
+           // --- Fallbacks seguros (evita TypeError em .replace) ---
+           let rawContent;
+           if (typeof message?.content === 'string') {
+             rawContent = message.content;
+           } else {
+             try {
+               rawContent = JSON.stringify(message?.content ?? '', null, 2);
+             } catch (e) {
+               rawContent = String(message?.content ?? '');
+             }
+           }
+           const userText = (rawContent || '');
+           const assistantText = (rawContent || '');
+      %>
+        <div class="message <%= message.sender === 'user' ? 'user-message' : 'assistant-message' %>">
+          <div class="message-content">
+            <% if (message.sender === 'user') { %>
+              <div class="assistant-type">Você</div>
+              <%= userText.replace(/\n/g, '<br>') %>
             <% } else { %>
-              <p class="text-muted">Nenhuma mensagem no histórico.</p>
+              <div class="assistant-type"><%= message.assistantType || 'Assistente' %></div>
+              <%- assistantText
+                    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                    .replace(/\n/g, '<br>') %>
+              <% if (message.assistantName) { %>
+                <div class="agent-name">~ <%= message.assistantName %></div>
+              <% } %>
             <% } %>
+
+            <% if (message.timestamp) { %>
+              <div class="message-timestamp">
+                <%= new Date(message.timestamp).toLocaleString('pt-BR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: '2-digit'
+                }).replace(',', ' -') %>
+              </div>
+            <% } %>
+          </div>
         </div>
-          
-        <!-- Icebreakers: sugestões rápidas do dia -->
-        <div id="icebreakers-container" style="margin-bottom:8px;">
-          <div style="font-weight:600; margin-bottom:6px;">Começar por:</div>
-          <div id="icebreakers" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
-        </div>
+      <% }) %>
+    <% } else { %>
+      <p class="text-muted">Nenhuma mensagem no histórico.</p>
+    <% } %>
+  </div>
 
-        <div class="chat-input-container">
-            <input type="text" id="chat-input" class="chat-input" placeholder="Digite sua mensagem..." required>
-            <button id="send-button" class="send-button">Enviar</button>
-        </div>
+  <!-- Icebreakers: sugestões rápidas do dia -->
+  <div id="icebreakers-container" style="margin-bottom:8px;">
+    <div style="font-weight:600; margin-bottom:6px;">Começar por:</div>
+    <div id="icebreakers" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+  </div>
 
-        <script>
-          (function () {
-            async function loadIcebreakers() {
-              try {
-                const res = await fetch('/chat/daily/icebreakers');
-                if (!res.ok) throw new Error('Erro carregando icebreakers');
-                const body = await res.json();
-                const temas = body.temas || [];
-                const cont = document.getElementById('icebreakers');
-                cont.innerHTML = '';
-                if (temas.length === 0) {
-                  cont.innerHTML = '<span style="opacity:.7">Sem sugestões por enquanto</span>';
-                  return;
-                }
-                temas.forEach((t) => {
-                  const btn = document.createElement('button');
-                  btn.type = 'button';
-                  btn.className = 'icebreaker-btn btn btn-light btn-sm';
-                  btn.style.borderRadius = '20px';
-                  btn.textContent = t;
-                  btn.addEventListener('click', () => onIcebreakerClick(t));
-                  cont.appendChild(btn);
-                });
-              } catch (err) {
-                console.error('loadIcebreakers err', err);
-              }
-            }
+  <div class="chat-input-container">
+    <input type="text" id="chat-input" class="chat-input" placeholder="Digite sua mensagem..." required>
+    <button id="send-button" class="send-button">Enviar</button>
+  </div>
 
-            function onIcebreakerClick(text) {
-              const field = document.getElementById('chat-input');
-              if (!field) { alert('Campo de mensagem não encontrado.'); return; }
-              field.value = text;
-              field.dispatchEvent(new Event('input', { bubbles: true }));
-              const sendBtn = document.getElementById('send-button');
-              if (sendBtn) sendBtn.click();
-            }
+  <script>
+    (function () {
+      async function loadIcebreakers() {
+        try {
+          const res = await fetch('/chat/daily/icebreakers');
+          if (!res.ok) throw new Error('Erro carregando icebreakers');
+          const body = await res.json();
+          const temas = body.temas || [];
+          const cont = document.getElementById('icebreakers');
+          cont.innerHTML = '';
+          if (temas.length === 0) {
+            cont.innerHTML = '<span style="opacity:.7">Sem sugestões por enquanto</span>';
+            return;
+          }
+          temas.forEach((t) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'icebreaker-btn btn btn-light btn-sm';
+            btn.style.borderRadius = '20px';
+            btn.textContent = t;
+            btn.addEventListener('click', () => onIcebreakerClick(t));
+            cont.appendChild(btn);
+          });
+        } catch (err) {
+          console.error('loadIcebreakers err', err);
+        }
+      }
 
-            document.addEventListener('DOMContentLoaded', loadIcebreakers);
-          })();
-        </script>
-    </div>
+      function onIcebreakerClick(text) {
+        const field = document.getElementById('chat-input');
+        if (!field) { alert('Campo de mensagem não encontrado.'); return; }
+        field.value = text;
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+        const sendBtn = document.getElementById('send-button');
+        if (sendBtn) sendBtn.click();
+      }
+
+      document.addEventListener('DOMContentLoaded', loadIcebreakers);
+    })();
+  </script>
+</div>
 
 </body>
 </html>
