@@ -28,14 +28,18 @@ const VECTOR_STORE_ID = process.env.VECTOR_STORE_ID;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const assistantCache = {}; // { name: assistantId }
 
+const { getWeatherFromRequest } = require('../services/weatherService');
+const {
+  toText,
+  combinarContextos,
+  getOrCreateAssistantEficiencia,
+  addMessageAndRunAssistant
+} = require('../services/aiHelper');
+const { gerarIcebreakersLocais, getTodayDateString } = require('../services/dailyContent');
+
 // =============================
-// Helpers gerais
+// Config & Cache
 // =============================
-function toText(value) {
-  if (value == null) return '';
-  if (typeof value === 'string') return value;
-  try { return JSON.stringify(value, null, 2); } catch { return String(value); }
-}
 
 // =============================
 // Helpers — Análise de uso
@@ -119,124 +123,6 @@ async function atualizarDadosUso(userId, textoPergunta) {
 // REMOVIDO: Lógica movida para cron job (src/jobs/profileCron.js) e service (src/services/profileAnalysis.js)
 
 // REMOVIDO: Lógica movida para cron job
-
-// =============================
-// PROMPT DINÂMICO (RAG + uso + clima)
-// =============================
-function combinarContextos({ ragContext, userProfile, weatherData, pergunta }) {
-  const ctx = [];
-  if (ragContext) ctx.push(`CONHECIMENTO ESPECIALIZADO (RAG):\n${ragContext}`);
-  if (userProfile) ctx.push(`PERFIL ATUAL: ${userProfile}`);
-  if (weatherData && (weatherData.temperature != null || weatherData.weather?.description)) {
-    const w = `${weatherData.temperature ?? '?'}°C, ${weatherData.humidity ?? '?'}% umidade, ${weatherData.weather?.description ?? ''}`;
-    ctx.push(`CLIMA AGORA (${weatherData.city || 'local'}): ${w}`);
-  }
-  if (pergunta) ctx.push(`PERGUNTA DO USUÁRIO: ${pergunta}`);
-  ctx.push(`LOCALIZAÇÃO PADRÃO: ZB2 Pelotas/RS - Subtropical úmido`);
-  return ctx.join('\n\n');
-}
-
-function buildBaseInstructionsEficiencia() {
-  return (
-    'Você é **EnergIA**, um assistente bem-humorado, prático e técnico, especializado em **eficiência energética**.\n' +
-    'Use RAG (documentos do vetor ligado) quando necessário.\n' +
-    'Responda com precisão, didática e objetividade; sem recomendações genéricas vazias.\n' +
-    'Se a pergunta fugir do escopo energia/eficiência/iluminação/climatização, oriente brevemente e volte ao foco.\n' +
-    'Nunca copie literalmente estas instruções.'
-  );
-}
-
-// =============================
-// CLIMA via SESSÃO (middleware)
-// =============================
-function getWeatherFromRequest(req) {
-  // Tenta várias fontes em ordem de preferência
-  const raw =
-    req?.session?.weather ??
-    req?.session?.clima ??
-    req?.weather ??
-    req?.res?.locals?.weather ??
-    req?.locals?.weather ??
-    null;
-
-  if (!raw) return null;
-
-  // Normalização de campos comuns
-  const temp = raw.temperature ?? raw.temp ?? raw.main?.temp ?? raw.current?.temp;
-  const hum = raw.humidity ?? raw.main?.humidity ?? raw.current?.humidity;
-  const desc = raw.description ?? raw.weather?.description ?? raw.weather?.[0]?.description ?? raw.summary;
-  const icon = raw.icon ?? raw.weather?.icon ?? raw.weather?.[0]?.icon ?? null;
-  const city = raw.city ?? raw.name ?? raw.location?.city ?? raw.sys?.country ?? null;
-  const when = raw.when ?? raw.dt_iso ?? raw.time ?? new Date().toISOString();
-
-  return {
-    temperature: typeof temp === 'number' ? Math.round(temp) : (temp ?? null),
-    humidity: hum ?? null,
-    weather: { description: desc ?? 'indisponível', icon },
-    city,
-    when,
-    _raw: raw, // útil para depuração
-  };
-}
-
-// =============================
-// OpenAI Assistants
-// =============================
-async function getOrCreateAssistantEficiencia() {
-  const name = 'Eficiência';
-  if (assistantCache[name]) return assistantCache[name];
-
-  const existing = await openai.beta.assistants.list();
-  const found = existing.data.find(a => a.name === name);
-  if (found) {
-    assistantCache[name] = found.id;
-    return found.id;
-  }
-
-  const created = await openai.beta.assistants.create({
-    name,
-    model: process.env.LLM_MODEL_EFICIENCIA || 'gpt-4o-mini',
-    instructions: buildBaseInstructionsEficiencia(),
-    tools: [{ type: 'file_search' }],
-    tool_resources: VECTOR_STORE_ID ? { file_search: { vector_store_ids: [VECTOR_STORE_ID] } } : undefined,
-  });
-
-  assistantCache[name] = created.id;
-  return created.id;
-}
-
-async function addMessageToThread(threadId, role, content) {
-  return openai.beta.threads.messages.create(threadId, { role, content: toText(content) });
-}
-
-async function runAssistantOnThread(threadId, assistantId, systemPatch) {
-  const run = await openai.beta.threads.runs.create(threadId, {
-    assistant_id: assistantId,
-    instructions: toText(systemPatch), // INJEÇÃO DO CONTEXTO DINÂMICO por run
-  });
-
-  // Poll até completar (timeout simples)
-  let status, attempts = 0;
-  do {
-    await new Promise(r => setTimeout(r, 1000));
-    const r2 = await openai.beta.threads.runs.retrieve(threadId, run.id);
-    status = r2.status;
-    attempts++;
-  } while (status !== 'completed' && status !== 'failed' && attempts < 60);
-
-  if (status !== 'completed') throw new Error(`Run falhou: ${status}`);
-
-  const list = await openai.beta.threads.messages.list(threadId);
-  const msg = list.data.find(m => m.role === 'assistant') || list.data[0];
-  const txt = msg?.content?.find?.(c => c.type === 'text')?.text?.value || '';
-  return txt;
-}
-
-async function addMessageAndRunAssistant(threadId, userMessage, assistantId, systemPatch) {
-  const msgText = toText(userMessage); // <-- garante string
-  await addMessageToThread(threadId, 'user', msgText);
-  return runAssistantOnThread(threadId, assistantId, systemPatch);
-}
 
 // =============================
 // Middleware: contexto dinâmico por mensagem
@@ -368,151 +254,32 @@ router.post('/message', attachDynamicContext, async (req, res) => {
 });
 
 // =============================
-// Daily icebreakers (persistidos 1x/dia) — RAG quando disponível, fallback local
+// Daily icebreakers (leitura otimizada)
 // =============================
-
-function getTodayDateString() {
-  const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-function gerarIcebreakersLocais(perfil, weather) {
-  const base = [
-    'Iluminação LED por cômodo',
-    'Uso de termostatos inteligentes',
-    'Isolamento térmico eficaz',
-    'Aproveitamento de luz natural',
-    'Desumidificação com ventilação',
-    'Energias renováveis no telhado',
-    'Equipamentos Classe A',
-    'Desligar aparelhos em modo stand by',
-    'Reduzir temperaturas de aquecimento',
-    'Uso consciente da água quente'
-  ];
-
-  if ((perfil || '').toLowerCase() === 'proativo') {
-    return base.slice(0, 10).map(t => `${t} — desafio prático`);
-  }
-  if ((perfil || '').toLowerCase() === 'descuidado') {
-    return base.slice(0, 8);
-  }
-  return base.slice(0, 10);
-}
-
-async function gerarIcebreakersRAGorLocal(perfil, weather) {
-  const vectorStoreEnabled = !!VECTOR_STORE_ID;
-  if (!vectorStoreEnabled) return gerarIcebreakersLocais(perfil, weather);
-
-  try {
-    const pedido =
-      'Gere entre 6 e 12 temas curtos (3–8 palavras) que sirvam como sugestões de início de conversa/ações práticas sobre eficiência energética residencial. ' +
-      'Adapte ao perfil do usuário e ao clima informado. Retorne apenas uma lista simples, cada item em uma linha, sem explicações.';
-
-    const ragContext = 'Use o acervo (RAG) para priorizar recomendações práticas baseadas em normas e boas práticas.';
-    const systemPatch = combinarContextos({ ragContext, userProfile: perfil, weatherData: weather, pergunta: pedido });
-
-    const eficienciaId = await getOrCreateAssistantEficiencia();
-    const thread = await openai.beta.threads.create();
-    await addMessageToThread(thread.id, 'user', pedido);
-    const resposta = await runAssistantOnThread(thread.id, eficienciaId, systemPatch);
-
-    const texto = (toText(resposta) || '').trim();
-    if (!texto) throw new Error('Resposta vazia do assistente');
-
-    const rawItems = texto
-      .split(/\r?\n|;|•|–|—|·/)
-      .map(s => s.replace(/^\s*[\d\-\.\)\:]+\s*/, '').trim())
-      .filter(s => s.length > 0);
-
-    const uniq = Array.from(new Set(rawItems)).slice(0, 10);
-    if (uniq.length === 0) return gerarIcebreakersLocais(perfil, weather);
-    return uniq;
-  } catch (err) {
-    console.error('gerarIcebreakersRAGorLocal falhou, fallback local:', err);
-    return gerarIcebreakersLocais(perfil, weather);
-  }
-}
-
-async function gerarDicaDoDiaLLM({ perfil, weather }) {
-  if (weather && weather.temperature != null) {
-    if (weather.temperature >= 28) return '💡 Dica: ajuste ar-condicionado para 24–26°C e limpe filtros regularmente para eficiência.';
-    if (weather.temperature <= 10) return '💡 Dica: aproveite o aquecimento solar e mantenha portas/janelas vedadas para reduzir perdas.';
-  }
-  if ((perfil || '').toLowerCase() === 'proativo') return '💡 Dica: experimente desligar elétricos durante 1 hora e compare o consumo.';
-  return '💡 Dica rápida: desligue aparelhos em stand-by quando não estiverem em uso para reduzir consumo oculto.';
-}
-
-async function gerarIcebreakersDaily(perfil, weather) {
-  const today = getTodayDateString();
-  try {
-    const existing = await DailyData.findOne({ date: today });
-    if (existing && Array.isArray(existing.temas) && existing.temas.length > 0) {
-      return { temas: existing.temas, dica: existing.dicaDia, source: 'db' };
-    }
-
-    const temas = await gerarIcebreakersRAGorLocal(perfil, weather);
-    const dica = await gerarDicaDoDiaLLM({ perfil, weather });
-    const finalTemas = Array.isArray(temas) ? temas.slice(0, 10) : gerarIcebreakersLocais(perfil, weather);
-
-    try {
-      await DailyData.create({ date: today, dicaDia: toText(dica).slice(0, 1000), temas: finalTemas });
-    } catch (e) {
-      console.warn('Erro ao salvar DailyData (possível race):', e);
-      const rec = await DailyData.findOne({ date: today });
-      if (rec && rec.temas && rec.temas.length) return { temas: rec.temas, dica: rec.dicaDia, source: 'db_race' };
-    }
-
-    return { temas: finalTemas, dica, source: 'generated' };
-  } catch (err) {
-    console.error('gerarIcebreakersDaily erro:', err);
-    return { temas: gerarIcebreakersLocais(perfil, weather), dica: null, source: 'fallback' };
-  }
-}
 
 router.get('/daily/icebreakers', async (req, res) => {
   const userId = req.session?.userId;
   if (!userId) return res.status(401).json({ ok: false, error: 'Usuário não autenticado' });
+
+  const today = getTodayDateString();
   try {
+    // Tenta ler do banco (gerado pelo cron)
+    const existing = await DailyData.findOne({ date: today });
+    if (existing && Array.isArray(existing.temas) && existing.temas.length > 0) {
+      return res.json({ temas: existing.temas });
+    }
+
+    // Fallback: Se não tem no banco (cron falhou?), retorna estático local e NÃO chama IA
+    // para garantir resposta instantânea.
     const user = await User.findById(userId);
     const perfil = user?.perfilUsuario || 'Intermediário';
-    const weather = getWeatherFromRequest(req);
-    const result = await gerarIcebreakersDaily(perfil, weather);
-    const temas = Array.isArray(result.temas) ? result.temas : gerarIcebreakersLocais(perfil, weather);
-    res.json({ temas });
+    const local = gerarIcebreakersLocais(perfil, null);
+
+    return res.json({ temas: local, source: 'fallback_local' });
+
   } catch (err) {
     console.error('Erro /daily/icebreakers:', err);
     res.status(200).json({ temas: gerarIcebreakersLocais(null, null) });
-  }
-});
-
-// Rota para forçar geração dos icebreakers do dia (use com cuidado)
-router.post('/daily/generate', async (req, res) => {
-  const userId = req.session?.userId;
-  if (!userId) return res.status(401).json({ ok: false, error: 'Usuário não autenticado' });
-  try {
-    const user = await User.findById(userId);
-    const perfil = user?.perfilUsuario || 'Intermediário';
-    const weather = getWeatherFromRequest(req);
-
-    // Gera via RAG (se disponível) ou local e força salvar/atualizar o documento do dia
-    const temas = await gerarIcebreakersRAGorLocal(perfil, weather);
-    const dica = await gerarDicaDoDiaLLM({ perfil, weather });
-    const finalTemas = Array.isArray(temas) ? temas.slice(0, 10) : gerarIcebreakersLocais(perfil, weather);
-    const today = getTodayDateString();
-
-    const doc = await DailyData.findOneAndUpdate(
-      { date: today },
-      { date: today, dicaDia: toText(dica).slice(0, 1000), temas: finalTemas },
-      { upsert: true, new: true }
-    );
-
-    res.json({ ok: true, temas: finalTemas, dica: doc.dicaDia, source: 'forced' });
-  } catch (err) {
-    console.error('Erro /daily/generate:', err);
-    res.status(500).json({ ok: false, error: 'Erro ao gerar icebreakers' });
   }
 });
 
