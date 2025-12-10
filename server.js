@@ -40,7 +40,7 @@ function getWeatherData(callback) {
       if (response.statusCode === 200) {
         try {
           const weatherData = JSON.parse(data);
-          
+
           // Estrutura completa de dados meteorológicos
           const weatherInfo = {
             temperature: Math.trunc(weatherData.main.temp),
@@ -93,9 +93,9 @@ function getTemperature(callback) {
     if (err) {
       callback(err, null);
     } else {
-      callback(null, { 
-        temperature: weatherData.temperature, 
-        icon: weatherData.weather.icon 
+      callback(null, {
+        temperature: weatherData.temperature,
+        icon: weatherData.weather.icon
       });
     }
   });
@@ -103,13 +103,13 @@ function getTemperature(callback) {
 
 //middleware
 app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-  }));
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+}));
 
 // Middleware para dados meteorológicos (aplicado globalmente para rotas autenticadas)
-app.use(weatherMiddleware(getWeatherData)); 
+app.use(weatherMiddleware(getWeatherData));
 
 // Configurar EJS
 app.set('view engine', 'ejs');
@@ -125,8 +125,8 @@ app.use('/editor', requireLogin, editorRouter);
 
 // Rotas que requerem autenticação - Aplicando requireLogin
 app.get('/editor', requireLogin, (req, res) => {
-    res.render('editorprompt/editor', { response: '' });
-  });
+  res.render('editorprompt/editor', { response: '' });
+});
 
 //Auth
 app.use(authRouter);
@@ -152,6 +152,8 @@ app.get('/dashboard', requireLogin, (req, res) => {
 
 ///////////////////////////////////////////
 // Iniciar servidor
+const { startProfileAnalysisJob } = require('./src/jobs/profileCron');
+startProfileAnalysisJob();
 app.listen(port, () => console.log(`Servidor rodando na porta ${port}!`));
 
 //////////////////////////////

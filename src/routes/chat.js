@@ -116,85 +116,9 @@ async function atualizarDadosUso(userId, textoPergunta) {
 // =============================
 // Assistente "AnalisePerfil" — classifica Descuidado/Intermediário/Proativo
 // =============================
-async function calculaPerfilUsuarioComAnalisePerfilAssistant(dadosUso) {
-  const name = 'AnalisePerfil';
-  let assistantId = assistantCache[name];
+// REMOVIDO: Lógica movida para cron job (src/jobs/profileCron.js) e service (src/services/profileAnalysis.js)
 
-  if (!assistantId) {
-    const existing = await openai.beta.assistants.list();
-    const found = existing.data.find(a => a.name === name);
-    if (found) {
-      assistantId = found.id;
-    } else {
-      const created = await openai.beta.assistants.create({
-        name,
-        model: process.env.LLM_MODEL_ANALISE || 'gpt-4o-mini',
-        instructions:
-          'Você classifica o **perfil de eficiência energética** do usuário a partir de dados de uso.\n' +
-          'Responda apenas com uma destas opções: Descuidado, Intermediário ou Proativo.'
-      });
-      assistantId = created.id;
-    }
-    assistantCache[name] = assistantId;
-  }
-
-  const thread = await openai.beta.threads.create();
-  const dadosTexto =
-    `ANÁLISE DE PERFIL COMPORTAMENTAL\n\n` +
-    `Dados do usuário:\n` +
-    `- Total de Interações: ${dadosUso.totalInteracoes}\n` +
-    `- Período Preferencial: ${dadosUso.periodoPreferencial}\n` +
-    `- Temas de Interesse: ${(dadosUso.temasInteresse || []).join(', ')}\n` +
-    `- Frequência de Uso: ${dadosUso.frequenciaUso}\n` +
-    `- Duração Média por Sessão: ${dadosUso.duracaoMediaSessao || 0} minutos\n` +
-    `- Perguntas Técnicas: ${dadosUso.perguntasTecnicas || 0}\n` +
-    `- Perguntas Básicas: ${dadosUso.perguntasBasicas || 0}\n` +
-    `- Engajamento com Desafios: ${dadosUso.engajamentoDesafios || 0}\n` +
-    `- Última Interação: ${dadosUso.ultimaInteracao}\n\n` +
-    `Classifique o perfil.`;
-
-  await openai.beta.threads.messages.create(thread.id, { role: 'user', content: toText(dadosTexto) });
-
-  const run = await openai.beta.threads.runs.create(thread.id, { assistant_id: assistantId });
-
-  // Poll até completar (timeout simples)
-  let status, attempts = 0;
-  do {
-    await new Promise(r => setTimeout(r, 1000));
-    const r2 = await openai.beta.threads.runs.retrieve(thread.id, run.id);
-    status = r2.status;
-    attempts++;
-  } while (status !== 'completed' && status !== 'failed' && attempts < 45);
-
-  if (status !== 'completed') return 'Intermediário';
-
-  const list = await openai.beta.threads.messages.list(thread.id);
-  const msg = list.data.find(m => m.role === 'assistant') || list.data[0];
-  const txt = msg?.content?.find?.(c => c.type === 'text')?.text?.value?.trim?.() || 'Intermediário';
-  const valid = ['Descuidado', 'Intermediário', 'Proativo'];
-  return valid.includes(txt) ? txt : 'Intermediário';
-}
-
-async function ensureDailyProfileUpdate(userId) {
-  const user = await User.findById(userId);
-  if (!user) return null;
-
-  await inicializarDadosUsoSePreciso(user);
-
-  const last = user.dadosUso?.ultimoCalculoPerfil ? new Date(user.dadosUso.ultimoCalculoPerfil) : null;
-  const now = new Date();
-  const need = !last || (now - last) > ONE_DAY_MS || !user.perfilUsuario;
-
-  if (!need) return { updated: false, perfil: user.perfilUsuario };
-
-  const perfil = await calculaPerfilUsuarioComAnalisePerfilAssistant(user.dadosUso);
-  await User.findByIdAndUpdate(userId, {
-    perfilUsuario: perfil,
-    'dadosUso.ultimoCalculoPerfil': now.toISOString(),
-    perfilAtualizadoEm: now,
-  });
-  return { updated: true, perfil };
-}
+// REMOVIDO: Lógica movida para cron job
 
 // =============================
 // PROMPT DINÂMICO (RAG + uso + clima)
@@ -330,9 +254,9 @@ async function attachDynamicContext(req, res, next) {
     // (1) Atualiza dados de uso (incrementos da interação atual)
     const dadosUso = await atualizarDadosUso(userId, rawMessage || '');
 
-    // (2) Garante atualização de perfil 1x/dia
-    const daily = await ensureDailyProfileUpdate(userId);
-    const perfil = daily?.perfil || user.perfilUsuario || 'Intermediário';
+    // (2) REMOVIDO ensureDailyProfileUpdate (Agora via Cron às 07:00)
+    // Apenas lemos o perfil atual do banco
+    const perfil = user.perfilUsuario || 'Intermediário';
 
     // (3) Clima vindo do middleware/sessão (sem chamadas externas aqui)
     const weatherData = getWeatherFromRequest(req);
