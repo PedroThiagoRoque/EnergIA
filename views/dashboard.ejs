@@ -42,132 +42,16 @@
       width: 150px;
     }
 
-    .card-custom {
-      background-color: rgba(0, 0, 0, 0.7);
-      border-radius: 15px;
-    }
 
-    .btn-custom {
-      background-color: #2c2c2c;
-      color: #fff;
-      border-radius: 10px;
-      padding: 9px;
-      font-size: 1.1em;
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      font-weight: bold;
-    }
 
-    .btn-conversar {
-      background: linear-gradient(-45deg, #009D17, #01EA41, #009D17, #004317);
-      color: #fff;
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 1.1em;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-end;
-      height: 20vh;
-      text-decoration: none;
-      font-weight: bold;
-      background-size: 400% 400%;
-      animation: gradientMove 7s ease infinite, scaleUp 1s ease-in-out infinite alternate;
-      transition: transform 0.3s ease;
-    }
 
-    .btn-conversar:hover,
-    :after {
-      color: #fff
-    }
-
-    .btn-conversar .icon-lamp {
-      font-size: 2.5rem;
-      /* Aumenta o tamanho do ícone para se destacar */
-    }
-
-    .btn-conversar span {
-      font-size: 1.5rem;
-      /* Define um tamanho de fonte adequado */
-      line-height: 1.8rem;
-      text-align: center;
-    }
-
-    @keyframes gradientMove {
-      0% {
-        background-position: 0% 50%;
-      }
-
-      50% {
-        background-position: 100% 50%;
-      }
-
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-
-    @keyframes scaleUp {
-      0% {
-        transform: scale(1);
-      }
-
-      100% {
-        transform: scale(1.05);
-      }
-    }
-
-    .icon-container {
-      background-color: #666;
-      padding: 10px;
-      border-radius: 5px;
-      margin-right: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .icon-container i {
-      color: #fff;
-      font-size: 1.5rem;
-    }
-
-    .btn-custom:hover {
-      background-color: #555;
-      color: #fff;
-    }
 
     .greeting {
       font-size: 1em;
       font-weight: bold;
     }
 
-    .temp-card,
-    .consumption-card {
-      background-color: rgba(0, 0, 0, 0);
-      padding: 10px 9px;
-      border-radius: 25px;
-      min-width: 110px;
-      text-align: left !important;
-      border: 2px solid #fff;
-    }
 
-    .temp-card h5,
-    .consumption-card h5 {
-      font-size: 1rem;
-      font-weight: bold;
-    }
-
-    .temp-card h2,
-    .consumption-card h2 {
-      font-weight: 800;
-    }
-
-    .card-custom {
-      background-color: rgba(0, 0, 0, 0);
-      border: 2px solid #fff;
-    }
 
     .icon-user {
       width: 50px;
@@ -279,6 +163,31 @@
     .user-dropdown-menu .dropdown-item:hover {
       background: #444;
     }
+
+    .btn-conversar-large {
+      background: linear-gradient(135deg, #009D17 0%, #01EA41 100%);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 15px 40px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 255, 65, 0.4);
+      max-width: 400px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-conversar-large:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 255, 65, 0.6);
+      columns: #fff;
+      text-decoration: none;
+    }
+
+    .btn-conversar-large:hover i {
+      transform: scale(1.1);
+    }
   </style>
 </head>
 
@@ -308,88 +217,42 @@
 
     </div>
 
-    <!-- Segunda Row: Dividida em 3 colunas -->
-    <div class="row">
-      <!-- Coluna 1: Nome e Botão Vamos Conversar -->
-      <div class="col-md-4 d-flex flex-column justify-content-end mb-3">
-        <div class="greeting">Olá,<br>
-          <h3>
-            <%= userName %>!
-          </h3>
+    <!-- Main Content: Centered Layout -->
+    <div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+      <div class="col-md-8 text-center">
+
+        <!-- Greeting Section -->
+        <div class="mb-5">
+          <h1 class="display-4 font-weight-bold">Olá, <%= userName %>!</h1>
+          <p class="lead" style="color: #cbd5e1;">Pronto para otimizar seu consumo de energia hoje?</p>
         </div>
-        <a href="/chat" class="btn btn-lg btn-conversar w-100 mt-3">
-          <div class="icon-lamp mb-2">
-            <i class="fas fa-lightbulb"></i>
-          </div>
-          <span>Vamos</span>
-          <span>Conversar</span>
-        </a>
 
-      </div>
-
-      <!-- Coluna 2: Informações rápidas e Série Histórica -->
-      <div class="col-md-4 d-flex flex-column justify-content-end mb-3">
-        <div class="d-flex justify-content-start mb-3">
-          <div class="temp-card text-center">
-            <h5>Tempo</h5>
-            <h2>
-              <%= temperature %>ºC
-            </h2>
+        <!-- Weather Widget (Simplified) -->
+        <div class="d-flex justify-content-center mb-5">
+          <div class="weather-pill d-flex align-items-center px-4 py-2"
+            style="background: rgba(255,255,255,0.1); border-radius: 50px; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2);">
             <% if (weatherIcon) { %>
-              <img src="https://openweathermap.org/img/wn/<%= weatherIcon %>@2x.png" alt="Ícone do tempo"
-                style="width:80px; height:80px;">
+              <img src="https://openweathermap.org/img/wn/<%= weatherIcon %>@2x.png" alt="Weather"
+                style="width: 50px; height: 50px;">
               <% } %>
-          </div>
-          <div class="consumption-card text-center ml-3">
-            <h5>Último Consumo</h5>
-            <h2>152 kWh</h2>
-          </div>
-        </div>
-        <div class="card card-custom">
-          <div class="card-body">
-            <h5>Comparação</h5>
-            <div class="d-flex justify-content-around align-items-end">
-              <div class="text-center">
-                <div style="height: 120px; width: 30px; background-color: #ff5722;"></div>
-                <p>Dez</p>
-              </div>
-              <div class="text-center">
-                <div style="height: 80px; width: 30px; background-color: #ff5722;"></div>
-                <p>Jan</p>
-              </div>
-              <div class="text-center">
-                <div style="height: 100px; width: 30px; background-color: #ff5722;"></div>
-                <p>Fev</p>
-              </div>
-              <div class="text-center">
-                <div style="height: 140px; width: 30px; background-color: #00ff00;"></div>
-                <p>Mar</p>
-              </div>
-            </div>
+                <span class="ml-3 h4 mb-0 font-weight-bold">
+                  <%= temperature %>ºC
+                </span>
+                <span class="ml-2 text-muted">em Pelotas</span>
           </div>
         </div>
-      </div>
 
-      <!-- Coluna 3: Botões de Pontuação, Histórico, Dica -->
-      <div class="col-md-4 d-flex flex-column justify-content-end mb-3">
-        <a href="/chat" class="btn btn-lg btn-custom w-100 mb-3">
-          <div class="icon-container">
-            <i class="fas fa-trophy"></i>
+        <!-- Main Action Button -->
+        <a href="/chat" class="btn btn-conversar-large mx-auto d-flex align-items-center justify-content-center">
+          <div class="mr-3 p-3 rounded-circle" style="background: rgba(255,255,255,0.2);">
+            <i class="fas fa-comments fa-2x"></i>
           </div>
-          Pontuação
-        </a>
-        <a href="/chat" class="btn btn-lg btn-custom w-100 mb-3">
-          <div class="icon-container">
-            <i class="fas fa-chart-line"></i>
+          <div class="text-left">
+            <div style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Assistente Virtual</div>
+            <div style="font-size: 1.5rem; font-weight: bold;">Iniciar Conversa</div>
           </div>
-          Histórico de Consumo
         </a>
-        <a href="/chat" class="btn btn-lg btn-custom w-100">
-          <div class="icon-container">
-            <i class="fas fa-lightbulb"></i>
-          </div>
-          Dica Aleatória
-        </a>
+
       </div>
     </div>
 
