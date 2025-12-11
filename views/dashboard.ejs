@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard do Usuário</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
   <style>
@@ -16,12 +18,13 @@
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: flex-start; /* Alinhamento no topo para deixar espaço para crescer */
+      align-items: flex-start;
+      /* Alinhamento no topo para deixar espaço para crescer */
       margin: 0;
       padding: 20px 0;
     }
 
-        .dashboard-container {
+    .dashboard-container {
       width: 95%;
       max-width: 1200px;
       padding: 20px;
@@ -56,52 +59,65 @@
       font-weight: bold;
     }
 
-.btn-conversar {
-  background: linear-gradient(-45deg, #009D17, #01EA41, #009D17, #004317);
-  color: #fff;
-  border-radius: 10px;
-  padding: 12px;
-  font-size: 1.1em;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-end;
-  height: 20vh;
-  text-decoration: none;
-  font-weight: bold;
-  background-size: 400% 400%;
-  animation: gradientMove 7s ease infinite, scaleUp 1s ease-in-out infinite alternate;
-  transition: transform 0.3s ease;
-}
+    .btn-conversar {
+      background: linear-gradient(-45deg, #009D17, #01EA41, #009D17, #004317);
+      color: #fff;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 1.1em;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-end;
+      height: 20vh;
+      text-decoration: none;
+      font-weight: bold;
+      background-size: 400% 400%;
+      animation: gradientMove 7s ease infinite, scaleUp 1s ease-in-out infinite alternate;
+      transition: transform 0.3s ease;
+    }
 
-.btn-conversar:hover , :after{
-    color:#fff
-}
+    .btn-conversar:hover,
+    :after {
+      color: #fff
+    }
 
-.btn-conversar .icon-lamp {
-  font-size: 2.5rem; /* Aumenta o tamanho do ícone para se destacar */
-}
+    .btn-conversar .icon-lamp {
+      font-size: 2.5rem;
+      /* Aumenta o tamanho do ícone para se destacar */
+    }
 
-.btn-conversar span {
-  font-size: 1.5rem; /* Define um tamanho de fonte adequado */
-  line-height: 1.8rem;
-  text-align: center;
-}
+    .btn-conversar span {
+      font-size: 1.5rem;
+      /* Define um tamanho de fonte adequado */
+      line-height: 1.8rem;
+      text-align: center;
+    }
 
-@keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+    @keyframes gradientMove {
+      0% {
+        background-position: 0% 50%;
+      }
 
-@keyframes scaleUp {
-  0% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(1.05);
-  }
-}
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes scaleUp {
+      0% {
+        transform: scale(1);
+      }
+
+      100% {
+        transform: scale(1.05);
+      }
+    }
+
     .icon-container {
       background-color: #666;
       padding: 10px;
@@ -127,7 +143,8 @@
       font-weight: bold;
     }
 
-    .temp-card, .consumption-card {
+    .temp-card,
+    .consumption-card {
       background-color: rgba(0, 0, 0, 0);
       padding: 10px 9px;
       border-radius: 25px;
@@ -136,12 +153,14 @@
       border: 2px solid #fff;
     }
 
-    .temp-card h5, .consumption-card h5 {
+    .temp-card h5,
+    .consumption-card h5 {
       font-size: 1rem;
       font-weight: bold;
     }
 
-    .temp-card h2, .consumption-card h2 {
+    .temp-card h2,
+    .consumption-card h2 {
       font-weight: 800;
     }
 
@@ -151,15 +170,17 @@
     }
 
     .icon-user {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: #666;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #666;
     }
 
     .icon-user i {
-    color: #fff; /* Cor do ícone */
-    font-size: 1.5rem; /* Tamanho do ícone */
+      color: #fff;
+      /* Cor do ícone */
+      font-size: 1.5rem;
+      /* Tamanho do ícone */
     }
 
     .footer {
@@ -195,62 +216,72 @@
         height: 40px;
       }
 
-        /* Ajuste para manter o logo e o ícone do usuário na mesma linha em mobile */
-     .row.align-items-center {
+      /* Ajuste para manter o logo e o ícone do usuário na mesma linha em mobile */
+      .row.align-items-center {
         display: flex;
         align-items: center;
-        justify-content: space-between; /* Garante que o logo e o ícone fiquem nas extremidades */
+        justify-content: space-between;
+        /* Garante que o logo e o ícone fiquem nas extremidades */
       }
 
       .logo-small {
-        width: 100px; /* Reduzir o tamanho do logo em dispositivos menores */
+        width: 100px;
+        /* Reduzir o tamanho do logo em dispositivos menores */
       }
 
       .icon-user {
         width: 40px;
         height: 40px;
       }
-     
-    .btn-conversar {
-        height: 25vh; /* Aumentar a altura em resoluções menores para caber os elementos */
+
+      .btn-conversar {
+        height: 25vh;
+        /* Aumentar a altura em resoluções menores para caber os elementos */
+      }
+
+      .btn-conversar span {
+        font-size: 1.8rem;
+        /* Ajuste o tamanho da fonte em telas menores */
+      }
+
+      .btn-conversar .icon-lamp {
+        font-size: 2rem;
+        /* Ajuste o tamanho do ícone em telas menores */
+      }
+
     }
 
-    .btn-conversar span {
-        font-size: 1.8rem; /* Ajuste o tamanho da fonte em telas menores */
-    }
-
-    .btn-conversar .icon-lamp {
-        font-size: 2rem; /* Ajuste o tamanho do ícone em telas menores */
-    }
-
-    }
     .user-dropdown-menu {
-  position: absolute;
-  top: 60px;
-  right: 0;
-  background: #222;
-  border: 1px solid #fff;
-  border-radius: 8px;
-  min-width: 120px;
-  z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-.user-dropdown-menu .dropdown-item {
-  color: #fff;
-  padding: 10px 18px;
-  display: block;
-  text-decoration: none;
-  border-bottom: 1px solid #444;
-  transition: background 0.2s;
-}
-.user-dropdown-menu .dropdown-item:last-child {
-  border-bottom: none;
-}
-.user-dropdown-menu .dropdown-item:hover {
-  background: #444;
-}
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background: #222;
+      border: 1px solid #fff;
+      border-radius: 8px;
+      min-width: 120px;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-dropdown-menu .dropdown-item {
+      color: #fff;
+      padding: 10px 18px;
+      display: block;
+      text-decoration: none;
+      border-bottom: 1px solid #444;
+      transition: background 0.2s;
+    }
+
+    .user-dropdown-menu .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .user-dropdown-menu .dropdown-item:hover {
+      background: #444;
+    }
   </style>
 </head>
+
 <body>
   <div class="dashboard-container">
     <!-- Primeira Row: Saudação do usuário + Ícone -->
@@ -259,7 +290,8 @@
         <img src="/public/logo-EnergIA.png" alt="Logo Energia" class="logo-small">
       </div>
       <div class="col-3 col-md-3 d-flex justify-content-end position-relative">
-        <div class="icon-user d-flex align-items-center justify-content-center" id="userMenuBtn" style="cursor:pointer;">
+        <div class="icon-user d-flex align-items-center justify-content-center" id="userMenuBtn"
+          style="cursor:pointer;">
           <i class="fas fa-user"></i>
           <span class="burger-lines ml-2 d-md-none">
             <i class="fas fa-bars"></i>
@@ -267,25 +299,32 @@
         </div>
         <!-- Dropdown Menu -->
         <div id="userDropdown" class="user-dropdown-menu" style="display:none;">
-          <a href="/logout" class="dropdown-item">Logoff</a>
+          <% if (typeof role !=='undefined' && role==='godmode' ) { %>
+            <a href="/admin" class="dropdown-item" style="color: #ef4444; font-weight: bold;">⚡ Godmode</a>
+            <% } %>
+              <a href="/logout" class="dropdown-item">Logoff</a>
         </div>
       </div>
-      
+
     </div>
 
     <!-- Segunda Row: Dividida em 3 colunas -->
     <div class="row">
       <!-- Coluna 1: Nome e Botão Vamos Conversar -->
       <div class="col-md-4 d-flex flex-column justify-content-end mb-3">
-        <div class="greeting">Olá,<br><h3> <%= userName %>!</h3></div>
+        <div class="greeting">Olá,<br>
+          <h3>
+            <%= userName %>!
+          </h3>
+        </div>
         <a href="/chat" class="btn btn-lg btn-conversar w-100 mt-3">
-            <div class="icon-lamp mb-2">
-              <i class="fas fa-lightbulb"></i>
-            </div>
-            <span>Vamos</span>
-            <span>Conversar</span>
-          </a>
-          
+          <div class="icon-lamp mb-2">
+            <i class="fas fa-lightbulb"></i>
+          </div>
+          <span>Vamos</span>
+          <span>Conversar</span>
+        </a>
+
       </div>
 
       <!-- Coluna 2: Informações rápidas e Série Histórica -->
@@ -293,10 +332,13 @@
         <div class="d-flex justify-content-start mb-3">
           <div class="temp-card text-center">
             <h5>Tempo</h5>
-            <h2><%= temperature %>ºC</h2>
+            <h2>
+              <%= temperature %>ºC
+            </h2>
             <% if (weatherIcon) { %>
-              <img src="https://openweathermap.org/img/wn/<%= weatherIcon %>@2x.png" alt="Ícone do tempo" style="width:80px; height:80px;">
-            <% } %>
+              <img src="https://openweathermap.org/img/wn/<%= weatherIcon %>@2x.png" alt="Ícone do tempo"
+                style="width:80px; height:80px;">
+              <% } %>
           </div>
           <div class="consumption-card text-center ml-3">
             <h5>Último Consumo</h5>
@@ -358,15 +400,16 @@
   </div>
 
   <script>
-  const userMenuBtn = document.getElementById('userMenuBtn');
-  const userDropdown = document.getElementById('userDropdown');
-  document.addEventListener('click', function(event) {
-    if (userMenuBtn.contains(event.target)) {
-      userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-    } else {
-      userDropdown.style.display = 'none';
-    }
-  });
-</script>
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    document.addEventListener('click', function (event) {
+      if (userMenuBtn.contains(event.target)) {
+        userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+      } else {
+        userDropdown.style.display = 'none';
+      }
+    });
+  </script>
 </body>
+
 </html>

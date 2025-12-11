@@ -9,6 +9,8 @@ const UserSchema = new mongoose.Schema({
   group: { type: String, required: true }, // Grupo ao qual o usuário pertence
   ageRange: { type: String, required: true }, // Faixa etária
   gender: { type: String, required: true }, // Gênero
+  role: { type: String, enum: ['user', 'godmode'], default: 'user' }, // Role do usuário
+  forcePasswordChange: { type: Boolean, default: false }, // Forçar troca de senha no próximo login
   perfilUsuario: { type: String, default: 'Intermediário' }, // Perfil comportamental: Descuidado, Intermediário, Proativo
   resumoUso: { type: String, default: '' }, // Resumo de padrões de uso e interação
   // Variáveis de uso separadas para análise de perfil

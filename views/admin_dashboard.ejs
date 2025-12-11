@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnergIA - Admin "Godmode"</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --container-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #ef4444;
+            /* Vermelho para admin */
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+
+        .section {
+            background: var(--container-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .role-user {
+            background: #334155;
+            color: #cbd5e1;
+        }
+
+        .role-godmode {
+            background: #7f1d1d;
+            color: #fca5a5;
+        }
+
+        .btn-reset {
+            background-color: #f59e0b;
+            border: none;
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .btn-reset:hover {
+            background-color: #d97706;
+        }
+
+        .error-log {
+            font-family: monospace;
+            color: #fca5a5;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="row">
+        <!-- Coluna de Solicitações (Destaque) -->
+        <div class="col-12 mb-4">
+            <% if (typeof resetRequests !=='undefined' && resetRequests.length> 0) { %>
+                <div class="section" style="border: 1px solid #f59e0b;">
+                    <h2 style="color: #f59e0b;">🔔 Solicitações de Reset Pendentes</h2>
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Usuário</th>
+                                <th>Email</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% resetRequests.forEach(req=> { %>
+                                <tr>
+                                    <td>
+                                        <%= req.timestampFormatted %>
+                                    </td>
+                                    <td>
+                                        <%= req.userName %>
+                                    </td>
+                                    <td>
+                                        <%= req.email %>
+                                    </td>
+                                    <td>
+                                        <button
+                                            onclick="resetPassword('<%= req.userId._id || req.userId %>', '<%= req.userName %>')"
+                                            class="btn-reset">
+                                            Resetar Agora
+                                        </button>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+                <% } %>
+        </div>
+    </div>
+
+    <!-- Coluna de Usuários -->
+    <div class="section">
+        <h2>👥 Usuários Cadastrados</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Ação</th>
+                    <th>Perfil</th>
+                    <th>Última Interação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(user=> { %>
+                    <tr>
+                        <td>
+                            <%= user.name %>
+                        </td>
+                        <td>
+                            <%= user.email %>
+                        </td>
+                        <td>
+                            <span class="role-badge role-<%= user.role %>">
+                                <%= user.role %>
+                            </span>
+                        </td>
+                        <td>
+                            <button onclick="resetPassword('<%= user._id %>', '<%= user.name %>')"
+                                class="btn-reset">Resetar Senha</button>
+                        </td>
+                        <td>
+                            <%= user.perfilUsuario %>
+                        </td>
+                        <td>
+                            <%= user.lastInteractionFormatted %>
+                        </td>
+                    </tr>
+                    <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>⚠️ Log de Erros Recentes</h2>
+        <% if (errors.length===0) { %>
+            <p style="color: var(--text-secondary); text-align: center;">Nenhum erro registrado.</p>
+            <% } else { %>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Mensagem</th>
+                            <th>Rota/User</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% errors.forEach(err=> { %>
+                            <tr>
+                                <td>
+                                    <%= err.timestampFormatted %>
+                                </td>
+                                <td>
+                                    <%= err.message %>
+                                </td>
+                                <td>
+                                    <%= err.route || '-' %> / <%= err.user || 'anon' %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
+                <% } %>
+    </div>
+    </div>
+
+    <script>
+        async function resetPassword(userId, userName) {
+            if (!confirm(`Tem certeza que deseja resetar a senha de ${userName} para "Mudar123!"?`)) return;
+
+            try {
+                const res = await fetch('/admin/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    alert(data.message);
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erro na requisição. Verifique console.');
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -11,7 +11,8 @@ require('dotenv').config();
 const chatRouter = require('./src/routes/chat');
 const editorRouter = require('./src/routes/editor');
 const authRouter = require('./src/routes/auth');
-const requireLogin = require('./src/middleware/auth'); // Importando middleware de autenticação
+const adminRouter = require('./src/routes/admin'); // Rota de Admin
+const { requireLogin } = require('./src/middleware/auth'); // Importando middleware de autenticação
 const weatherMiddleware = require('./src/middleware/weatherMiddleware'); // Importando middleware meteorológico
 const { getWeatherData, getTemperature } = require('./src/services/weatherService');
 
@@ -47,22 +48,17 @@ app.use(express.static('public'));
 app.use('/public', express.static(path.join(__dirname, 'public')))
 
 // Rota principal
+app.use('/', authRouter); // Disponibiliza login, register, logout
 app.get('/', (req, res) => res.render('home'));
 app.use('/chat', requireLogin, chatRouter);
 app.use('/editor', requireLogin, editorRouter);
+app.use('/admin', adminRouter); // Rota de Admin (já possui middleware interno)
 
 // Rotas que requerem autenticação - Aplicando requireLogin
-app.get('/editor', requireLogin, (req, res) => {
-  res.render('editorprompt/editor', { response: '' });
-});
-
-//Auth
-app.use(authRouter);
-
-// Dashboard
 app.get('/dashboard', requireLogin, (req, res) => {
+  const { getTemperature } = require('./src/services/weatherService');
   getTemperature((err, weather) => {
-    let temperature = '';
+    let temperature = '--';
     let weatherIcon = '';
     if (!err && weather) {
       temperature = weather.temperature;
@@ -71,11 +67,11 @@ app.get('/dashboard', requireLogin, (req, res) => {
     res.render('dashboard', {
       userName: req.session.userName,
       temperature,
-      weatherIcon
+      weatherIcon,
+      role: req.session.role // Passando a role para a view
     });
   });
 });
-
 
 
 ///////////////////////////////////////////
