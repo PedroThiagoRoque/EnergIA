@@ -20,7 +20,7 @@ function formatResponse(str) {
         .replace(/\n/g, '<br>');
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Adiciona CSS para o nome do agente se não existir
     if (!document.querySelector('style[data-agent-name]')) {
         const style = document.createElement('style');
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatInput = document.getElementById('chat-input');
     const sendButton = document.getElementById('send-button');
 
-    sendButton.addEventListener('click', function() {
+    sendButton.addEventListener('click', function () {
         const messageInput = document.getElementById('chat-input');
         const message = messageInput.value.trim();
         const chatWindow = document.getElementById('chat-window');
@@ -73,54 +73,91 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             chatWindow.scrollTop = chatWindow.scrollHeight;
 
-            // Enviar a mensagem para o backend
+            // Enviar a mensagem para o backend (STREAMING)
             fetch('/chat/message', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message })
             })
-            .then(response => response.json())
-            .then(data => {
-                // Substitui o balão de loading pela resposta do assistente
-                const assistantTimestamp = formatTimestamp(new Date());
-                const spinnerDiv = document.getElementById(spinnerId);
-                if (spinnerDiv) {
-                    const assistantType = data.assistantType || data.assistant || 'Assistente';
-                    const assistantName = data.assistantName || data.assistant || '';
-                    const agentNameHtml = assistantName ? `<div class="agent-name">~ ${assistantName}</div>` : '';
-                    const responseText = (data.response != null) ? data.response : (data.reply != null ? data.reply : '');
-                    spinnerDiv.innerHTML = `
-                        <div class="message-content">
-                            <div class="assistant-type">${assistantType}</div>
-                            ${formatResponse(responseText)}
-                            ${agentNameHtml}
-                            <div class="message-timestamp">
-                                ${assistantTimestamp}
-                            </div>
-                        </div>
-                    `;
-                }
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-            })
-            .catch(err => {
-                // Em caso de erro, remove o spinner e mostra mensagem de erro
-                const spinnerDiv = document.getElementById(spinnerId);
-                if (spinnerDiv) {
-                    spinnerDiv.innerHTML = `
+                .then(async response => {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+
+                    // Prepara balão do assistente
+                    const assistantTimestamp = formatTimestamp(new Date());
+                    const spinnerDiv = document.getElementById(spinnerId);
+
+                    // Variáveis para montar a resposta final
+                    let fullText = '';
+                    let assistantType = 'Assistente';
+                    let assistantName = '';
+
+                    // Loop de leitura do stream
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n\n'); // SSE separa eventos por \n\n
+                        buffer = lines.pop(); // Guarda o resto incompleto
+
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const dataStr = line.replace('data: ', '');
+                                try {
+                                    const data = JSON.parse(dataStr);
+
+                                    if (data.chunk) {
+                                        // Chegou pedaço de texto
+                                        fullText += data.chunk;
+
+                                        // Atualiza UI instantaneamente
+                                        if (spinnerDiv) {
+                                            spinnerDiv.innerHTML = `
+                                            <div class="message-content">
+                                                <div class="assistant-type">${assistantType}</div>
+                                                ${formatResponse(fullText)}
+                                                <div class="message-timestamp">${assistantTimestamp}</div>
+                                            </div>
+                                        `;
+                                        }
+                                        chatWindow.scrollTop = chatWindow.scrollHeight;
+                                    }
+                                    else if (data.done) {
+                                        // Fim do stream com metadados
+                                        // Se quiser atualizar algo na tela com data.dadosUso ou data.weather, faz aqui.
+                                        // Ex: atualizar nome do assistente se vier
+                                        if (data.assistantName) assistantName = data.assistantName;
+                                    }
+                                    else if (data.error) {
+                                        console.error('Erro no stream:', data.error);
+                                        fullText += '\n[Erro ao processar resposta]';
+                                    }
+
+                                } catch (e) {
+                                    console.warn('Erro parse JSON stream:', e);
+                                }
+                            }
+                        }
+                    }
+                })
+                .catch(err => {
+                    const spinnerDiv = document.getElementById(spinnerId);
+                    if (spinnerDiv) {
+                        spinnerDiv.innerHTML = `
                         <div class="message-content text-danger">
-                            Erro ao enviar mensagem. Tente novamente.
+                            Erro de conexão. Tente novamente.
                         </div>
                     `;
-                }
-                console.error('Erro ao enviar mensagem:', err);
-            });
+                    }
+                    console.error('Erro geral fetch:', err);
+                });
         }
     });
 
     // Enviar ao pressionar "Enter"
-    chatInput.addEventListener('keypress', function(e) {
+    chatInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
             sendButton.click();

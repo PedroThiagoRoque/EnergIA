@@ -90,6 +90,22 @@ async function addMessageAndRunAssistant(threadId, userMessage, assistantId, sys
     return runAssistantOnThread(threadId, assistantId, systemPatch);
 }
 
+// =============================
+// STREAMING
+// =============================
+function runAssistantOnThreadStream(threadId, assistantId, systemPatch) {
+    return openai.beta.threads.runs.stream(threadId, {
+        assistant_id: assistantId,
+        instructions: toText(systemPatch),
+    });
+}
+
+async function addMessageAndRunAssistantStream(threadId, userMessage, assistantId, systemPatch) {
+    const msgText = toText(userMessage);
+    await addMessageToThread(threadId, 'user', msgText);
+    return runAssistantOnThreadStream(threadId, assistantId, systemPatch);
+}
+
 module.exports = {
     openai,
     toText,
@@ -97,5 +113,9 @@ module.exports = {
     getOrCreateAssistantEficiencia,
     addMessageToThread,
     runAssistantOnThread,
-    addMessageAndRunAssistant
+    addMessageToThread,
+    runAssistantOnThread,
+    addMessageAndRunAssistant,
+    runAssistantOnThreadStream,
+    addMessageAndRunAssistantStream
 };

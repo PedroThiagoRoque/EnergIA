@@ -33,7 +33,8 @@ const {
   toText,
   combinarContextos,
   getOrCreateAssistantEficiencia,
-  addMessageAndRunAssistant
+  addMessageAndRunAssistant,
+  addMessageAndRunAssistantStream // Novo helper
 } = require('../services/aiHelper');
 const { gerarIcebreakersLocais, getTodayDateString } = require('../services/dailyContent');
 
@@ -203,6 +204,11 @@ router.post('/message', attachDynamicContext, async (req, res) => {
     return res.status(400).json({ ok: false, error: 'Mensagem vazia ou inválida.' });
   }
 
+  // Configura Headers para SSE
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
   try {
     let chat = await Chat.findOne({ userId });
     let threadId;
@@ -220,36 +226,53 @@ router.post('/message', attachDynamicContext, async (req, res) => {
     chat.messages.push({ sender: 'user', content: msgText, timestamp: new Date() });
     await chat.save();
 
-    // Apenas 2 assistentes: Eficiência (RAG) e AnalisePerfil (interno para cálculo do perfil)
     const eficienciaId = await getOrCreateAssistantEficiencia();
 
-    // Executa com PATCH dinâmico (uso + clima)
-    const reply = await addMessageAndRunAssistant(
+    // Inicia Stream
+    const stream = await addMessageAndRunAssistantStream(
       threadId,
       msgText,
       eficienciaId,
       req.dynamicContext.systemPatch
     );
 
-    // Salva resposta
+    let fullResponse = '';
+
+    for await (const event of stream) {
+      if (event.event === 'thread.message.delta') {
+        const chunk = event.data.delta.content?.[0]?.text?.value;
+        if (chunk) {
+          fullResponse += chunk;
+          // Envia chunk para o cliente
+          res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+        }
+      }
+    }
+
+    // Salva resposta do assistente no banco
     chat.messages.push({
       sender: 'assistant',
-      content: reply,
+      content: fullResponse,
       assistantName: 'Eficiência',
       timestamp: new Date()
     });
     await chat.save();
 
-    res.json({
-      ok: true,
-      reply,
+    // Envia evento final com metadados
+    const metadata = {
+      done: true,
       perfilUsuario: req.dynamicContext.perfil,
       dadosUso: req.dynamicContext.dadosUso,
       weather: req.dynamicContext.weatherData,
-    });
+    };
+    res.write(`data: ${JSON.stringify(metadata)}\n\n`);
+    res.end();
+
   } catch (err) {
     console.error('Erro /message:', err);
-    res.status(500).send('Erro ao processar a mensagem');
+    // Tenta enviar erro via SSE se a conexão ainda estiver aberta
+    res.write(`data: ${JSON.stringify({ error: 'Erro ao processar mensagem' })}\n\n`);
+    res.end();
   }
 });
 
