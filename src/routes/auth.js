@@ -10,7 +10,7 @@ router.get('/register', (req, res) => res.render('register'));
 
 // Registro de Novo Usuário
 router.post('/register', async (req, res) => {
-  const { name, email, password, group, ageRange, gender } = req.body;
+  const { name, email, password, group, ageRange, gender, vinculo } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
     const newUser = await User.create({
@@ -20,6 +20,7 @@ router.post('/register', async (req, res) => {
       group,
       ageRange,
       gender,
+      vinculo,
     });
     res.redirect('/login?registered=true');
   } catch (err) {

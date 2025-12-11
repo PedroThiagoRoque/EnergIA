@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registrar-se</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
+
 <body>
   <div class="container mt-5">
     <div class="row justify-content-center">
@@ -25,6 +28,17 @@
                 <input type="email" class="form-control" id="email" name="email" required>
               </div>
               <div class="mb-3">
+                <label for="vinculo" class="form-label">Vínculo com a UFPEL</label>
+                <select class="form-select" id="vinculo" name="vinculo" required>
+                  <option value="" disabled selected>Selecione...</option>
+                  <option value="Estudante">Estudante</option>
+                  <option value="Técnico Administrativo">Técnico Administrativo</option>
+                  <option value="Docente">Docente</option>
+                  <option value="Tercerizado">Tercerizado</option>
+                  <option value="Outro">Outro</option>
+                </select>
+              </div>
+              <div class="mb-3">
                 <label for="password" class="form-label">Senha</label>
                 <input type="password" class="form-control" id="password" name="password" required>
               </div>
@@ -38,10 +52,16 @@
               <div class="mb-3">
                 <label for="ageRange" class="form-label">Faixa Etária</label>
                 <select class="form-select" id="ageRange" name="ageRange" required>
+                  <option value="" disabled selected>Selecione...</option>
                   <option value="18-25">18-25</option>
-                  <option value="26-35">26-35</option>
-                  <option value="36-45">36-45</option>
-                  <option value="46+">46+</option>
+                  <option value="26-30">26-30</option>
+                  <option value="31-35">31-35</option>
+                  <option value="36-40">36-40</option>
+                  <option value="41-45">41-45</option>
+                  <option value="46-50">46-50</option>
+                  <option value="51-55">51-55</option>
+                  <option value="56-60">56-60</option>
+                  <option value="61+">61+</option>
                 </select>
               </div>
               <div class="mb-3">
@@ -66,4 +86,5 @@
     </div>
   </div>
 </body>
+
 </html>
