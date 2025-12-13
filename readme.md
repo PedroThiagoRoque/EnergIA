@@ -14,9 +14,9 @@ Plataforma desenvolvida para testes de chatbots focados em eficiência energéti
 
 <div align="center">
   <!-- Adicione aqui as imagens do projeto -->
-  <img src="https://via.placeholder.com/800x400?text=Dashboard+Screenshoot" alt="Dashboard" width="800">
+  <img src="public/api1.png" alt="Dashboard" width="800">
   <br><br>
-  <img src="https://via.placeholder.com/800x400?text=Chat+Interface+Screenshoot" alt="Chat Interface" width="800">
+  <img src="public/api2.png" alt="Chat Interface" width="800">
 </div>
 
 ---
