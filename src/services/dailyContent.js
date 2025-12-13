@@ -9,6 +9,7 @@ const {
 } = require('./aiHelper');
 const { openai } = require('./aiHelper');
 
+
 const VECTOR_STORE_ID = process.env.VECTOR_STORE_ID;
 
 function gerarIcebreakersLocais(perfil, weather) {
@@ -100,4 +101,36 @@ async function gerarEGravarDailyContent(perfil, weather) {
     return doc;
 }
 
-module.exports = { gerarEGravarDailyContent, gerarIcebreakersLocais, getTodayDateString };
+async function gerarNotificacaoToast({ perfil, weather }) {
+    // Se falhar a IA, usa fallback
+    const fallbacks = [
+        "Economize energia: desligue luzes ao sair!",
+        "Um banho mais curto poupa água e energia.",
+        "Aproveite a luz natural hoje.",
+        "Verifique se aparelhos estão em stand-by."
+    ];
+
+    try {
+        const pedido = 'Gere uma frase curtíssima (max 10 palavras) e impactante para notificação push/toast de celular sobre economia de energia. Tom motivador e prático.';
+
+        // Pode reutilizar thread ou criar efêmera. Aqui criando efêmera.
+        const eficienciaId = await getOrCreateAssistantEficiencia();
+        const thread = await openai.beta.threads.create();
+
+        const systemPatch = combinarContextos({ userProfile: perfil, weatherData: weather, pergunta: pedido });
+        await addMessageToThread(thread.id, 'user', pedido);
+        const resposta = await runAssistantOnThread(thread.id, eficienciaId, systemPatch);
+
+        let texto = toText(resposta).trim();
+        // Remove aspas se vierem
+        texto = texto.replace(/^["']|["']$/g, '');
+
+        if (!texto) return fallbacks[0];
+        return texto;
+    } catch (err) {
+        console.error('Erro ao gerar toast:', err);
+        return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+    }
+}
+
+module.exports = { gerarEGravarDailyContent, gerarIcebreakersLocais, getTodayDateString, gerarNotificacaoToast };

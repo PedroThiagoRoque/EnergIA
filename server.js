@@ -12,6 +12,7 @@ const chatRouter = require('./src/routes/chat');
 const editorRouter = require('./src/routes/editor');
 const authRouter = require('./src/routes/auth');
 const adminRouter = require('./src/routes/admin'); // Rota de Admin
+const apiRouter = require('./src/routes/api'); // Rotas da API Mobile
 const { requireLogin } = require('./src/middleware/auth'); // Importando middleware de autenticação
 const weatherMiddleware = require('./src/middleware/weatherMiddleware'); // Importando middleware meteorológico
 const { getWeatherData, getTemperature } = require('./src/services/weatherService');
@@ -53,6 +54,7 @@ app.get('/', (req, res) => res.render('home'));
 app.use('/chat', requireLogin, chatRouter);
 app.use('/editor', requireLogin, editorRouter);
 app.use('/admin', adminRouter); // Rota de Admin (já possui middleware interno)
+app.use('/api', apiRouter); // Rotas de API Pública (Mobile)
 
 // Rotas que requerem autenticação - Aplicando requireLogin
 app.get('/dashboard', requireLogin, (req, res) => {
