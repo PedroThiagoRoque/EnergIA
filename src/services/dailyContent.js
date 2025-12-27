@@ -11,6 +11,7 @@ const { openai } = require('./aiHelper');
 
 
 const VECTOR_STORE_ID = process.env.VECTOR_STORE_ID;
+const prompts = require('../config/prompts');
 
 function gerarIcebreakersLocais(perfil, weather) {
     const base = [
@@ -40,11 +41,9 @@ async function gerarIcebreakersRAGorLocal(perfil, weather) {
     if (!vectorStoreEnabled) return gerarIcebreakersLocais(perfil, weather);
 
     try {
-        const pedido =
-            'Gere entre 6 e 12 temas curtos (3–8 palavras) que sirvam como sugestões de início de conversa/ações práticas sobre eficiência energética residencial. ' +
-            'Adapte ao perfil do usuário e ao clima informado. Retorne apenas uma lista simples, cada item em uma linha, sem explicações.';
+        const pedido = prompts.daily.icebreakers.user;
 
-        const ragContext = 'Use o acervo (RAG) para priorizar recomendações práticas baseadas em normas e boas práticas.';
+        const ragContext = prompts.daily.icebreakers.ragContext;
         const systemPatch = combinarContextos({ ragContext, userProfile: perfil, weatherData: weather, pergunta: pedido });
 
         const eficienciaId = await getOrCreateAssistantEficiencia();
@@ -70,12 +69,54 @@ async function gerarIcebreakersRAGorLocal(perfil, weather) {
 }
 
 async function gerarDicaDoDiaLLM({ perfil, weather }) {
-    if (weather && weather.temperature != null) {
-        if (weather.temperature >= 28) return '💡 Dica: ajuste ar-condicionado para 24–26°C e limpe filtros regularmente para eficiência.';
-        if (weather.temperature <= 10) return '💡 Dica: aproveite o aquecimento solar e mantenha portas/janelas vedadas para reduzir perdas.';
+    const fallback = '💡 Dica rápida: desligue aparelhos em stand-by quando não estiverem em uso para reduzir consumo oculto.';
+    console.log('[DicaDia] Iniciando geração de dica do dia via LLM...');
+
+    try {
+        const pedido = prompts.daily.tip.user;
+
+        const ragContext = prompts.daily.tip.ragContext;
+        const systemPatch = combinarContextos({ ragContext, userProfile: perfil, weatherData: weather, pergunta: pedido });
+        console.log('[DicaDia] Contexto montado. Obtendo assistente...');
+
+        const eficienciaId = await getOrCreateAssistantEficiencia();
+        console.log(`[DicaDia] Assistant ID: ${eficienciaId}`);
+
+        const thread = await openai.beta.threads.create();
+        console.log(`[DicaDia] Thread criada: ${thread.id}`);
+
+        await addMessageToThread(thread.id, 'user', pedido);
+        console.log('[DicaDia] Mensagem adicionada. Rodando assistente...');
+
+        const resposta = await runAssistantOnThread(thread.id, eficienciaId, systemPatch);
+        console.log(`[DicaDia] Resposta crua do assistente: "${resposta}"`);
+
+        let texto = toText(resposta).trim();
+        texto = texto.replace(/^["']|["']$/g, ''); // Remove wrapping quotes
+
+        if (!texto) {
+            console.warn('[DicaDia] Resposta vazia após processamento. Usando fallback.');
+            return fallback;
+        }
+
+        if (!texto.startsWith('💡')) texto = `💡 Dica: ${texto}`;
+
+        console.log(`[DicaDia] Sucesso: ${texto}`);
+        return texto;
+
+    } catch (err) {
+        console.error('Erro ao gerar Dica do Dia LLM:', err);
+        if (err.response) {
+            console.error('OpenAI Response Data:', err.response.data);
+        }
+        // Fallback inteligente baseado em clima/perfil se a IA falhar
+        if (weather && weather.temperature != null) {
+            if (weather.temperature >= 28) return '💡 Dica: ajuste ar-condicionado para 24–26°C e limpe filtros regularmente para eficiência.';
+            if (weather.temperature <= 10) return '💡 Dica: aproveite o aquecimento solar e mantenha portas/janelas vedadas para reduzir perdas.';
+        }
+        if ((perfil || '').toLowerCase() === 'proativo') return '💡 Dica: experimente desligar elétricos durante 1 hora e compare o consumo.';
+        return fallback;
     }
-    if ((perfil || '').toLowerCase() === 'proativo') return '💡 Dica: experimente desligar elétricos durante 1 hora e compare o consumo.';
-    return '💡 Dica rápida: desligue aparelhos em stand-by quando não estiverem em uso para reduzir consumo oculto.';
 }
 
 function getTodayDateString() {
@@ -90,15 +131,57 @@ async function gerarEGravarDailyContent(perfil, weather) {
     const temas = await gerarIcebreakersRAGorLocal(perfil, weather);
     const dica = await gerarDicaDoDiaLLM({ perfil, weather });
     const finalTemas = Array.isArray(temas) ? temas.slice(0, 10) : gerarIcebreakersLocais(perfil, weather);
+
+    // Gerar Toasts
+    let dailyToasts = [];
+    try {
+        console.log('[DailyContent] Gerando toasts...');
+        dailyToasts = await gerarToastsBatch(perfil, weather);
+    } catch (err) {
+        console.error('[DailyContent] Erro ao gerar toasts batch:', err);
+    }
+
     const today = getTodayDateString();
+
+    const updateData = { date: today, dicaDia: toText(dica).slice(0, 1000), temas: finalTemas, toasts: dailyToasts };
+    console.log('[DailyContent] Tentando atualizar DB:', updateData);
 
     const doc = await DailyData.findOneAndUpdate(
         { date: today },
-        { date: today, dicaDia: toText(dica).slice(0, 1000), temas: finalTemas },
+        updateData,
         { upsert: true, new: true }
     );
 
+    console.log('[DailyContent] DB Atualizado. Doc ID:', doc?._id);
+    console.log('[DailyContent] Dica salva:', doc?.dicaDia);
+    console.log(`[DailyContent] Toasts salvos: ${doc?.toasts?.length}`);
+
     return doc;
+}
+
+async function gerarToastsBatch(perfil, weather) {
+    try {
+        const pedido = prompts.daily.toast.user;
+        const ragContext = 'Use criatividade e dados técnicos para frases motivadoras.';
+        const systemPatch = combinarContextos({ ragContext, userProfile: perfil, weatherData: weather, pergunta: pedido });
+
+        const eficienciaId = await getOrCreateAssistantEficiencia();
+        const thread = await openai.beta.threads.create();
+
+        await addMessageToThread(thread.id, 'user', pedido);
+        const resposta = await runAssistantOnThread(thread.id, eficienciaId, systemPatch);
+
+        const text = toText(resposta).replace(/```json|```/g, '').trim();
+        const json = JSON.parse(text);
+
+        if (json.toasts && Array.isArray(json.toasts)) {
+            return json.toasts.slice(0, 5);
+        }
+        return [];
+    } catch (err) {
+        console.error('Erro no batch de toasts:', err);
+        return [];
+    }
 }
 
 async function gerarNotificacaoToast({ perfil, weather }) {
@@ -111,24 +194,17 @@ async function gerarNotificacaoToast({ perfil, weather }) {
     ];
 
     try {
-        const pedido = 'Gere uma frase curtíssima (max 10 palavras) e impactante para notificação push/toast de celular sobre economia de energia. Tom motivador e prático.';
+        const today = getTodayDateString();
+        const doc = await DailyData.findOne({ date: today });
 
-        // Pode reutilizar thread ou criar efêmera. Aqui criando efêmera.
-        const eficienciaId = await getOrCreateAssistantEficiencia();
-        const thread = await openai.beta.threads.create();
+        if (doc && doc.toasts && doc.toasts.length > 0) {
+            const random = doc.toasts[Math.floor(Math.random() * doc.toasts.length)];
+            return random;
+        }
 
-        const systemPatch = combinarContextos({ userProfile: perfil, weatherData: weather, pergunta: pedido });
-        await addMessageToThread(thread.id, 'user', pedido);
-        const resposta = await runAssistantOnThread(thread.id, eficienciaId, systemPatch);
-
-        let texto = toText(resposta).trim();
-        // Remove aspas se vierem
-        texto = texto.replace(/^["']|["']$/g, '');
-
-        if (!texto) return fallbacks[0];
-        return texto;
+        return fallbacks[Math.floor(Math.random() * fallbacks.length)];
     } catch (err) {
-        console.error('Erro ao gerar toast:', err);
+        console.error('Erro ao recuperar toast:', err);
         return fallbacks[Math.floor(Math.random() * fallbacks.length)];
     }
 }

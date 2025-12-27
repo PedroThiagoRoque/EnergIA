@@ -1,6 +1,8 @@
 const OpenAI = require('openai');
 require('dotenv').config();
 
+const prompts = require('../config/prompts');
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const assistantCache = {};
 
@@ -23,9 +25,7 @@ async function calculaPerfilUsuarioComAnalisePerfilAssistant(dadosUso) {
             const created = await openai.beta.assistants.create({
                 name,
                 model: process.env.LLM_MODEL_ANALISE || 'gpt-4o-mini',
-                instructions:
-                    'Você classifica o **perfil de eficiência energética** do usuário a partir de dados de uso.\n' +
-                    'Responda apenas com uma destas opções: Descuidado, Intermediário ou Proativo.'
+                instructions: prompts.assistants.analisePerfil.instructions
             });
             assistantId = created.id;
         }

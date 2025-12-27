@@ -20,6 +20,10 @@ const DailyDataSchema = new mongoose.Schema({
       },
       message: 'Temas deve ser um array de strings.'
     }
+  },
+  toasts: {
+    type: [String],
+    default: []
   }
 }, { timestamps: true });
 
