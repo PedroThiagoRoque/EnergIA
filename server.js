@@ -78,10 +78,16 @@ app.get('/dashboard', requireLogin, (req, res) => {
 
 ///////////////////////////////////////////
 // Iniciar servidor
-const { startProfileAnalysisJob } = require('./src/jobs/profileCron');
-const { startDailyContentJob } = require('./src/jobs/dailyCron');
-startProfileAnalysisJob();
-startDailyContentJob();
+const cronManager = require('./src/services/cronManager');
+const profileCron = require('./src/jobs/profileCron');
+const dailyCron = require('./src/jobs/dailyCron');
+
+// Registrar Jobs
+cronManager.register('profileAnalysis', profileCron.defaultSchedule, profileCron.handler);
+cronManager.register('dailyContent', dailyCron.defaultSchedule, dailyCron.handler);
+
+// Iniciar Jobs
+cronManager.startAll();
 app.listen(port, () => console.log(`Servidor rodando na porta ${port}!`));
 
 //////////////////////////////

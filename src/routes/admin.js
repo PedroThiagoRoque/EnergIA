@@ -74,4 +74,45 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
+// CRON JOBS API
+
+// Import CronManager singleton
+const cronManager = require('../services/cronManager');
+
+// Listar Cronjobs
+router.get('/crons', (req, res) => {
+    try {
+        const jobs = cronManager.getAllJobs();
+        res.json({ ok: true, jobs });
+    } catch (err) {
+        console.error('Erro ao listar cronjobs:', err);
+        res.status(500).json({ ok: false, error: 'Erro ao listar cronjobs.' });
+    }
+});
+
+// Rodar Job Imediatamente
+router.post('/crons/:name/run', async (req, res) => {
+    const { name } = req.params;
+    try {
+        await cronManager.runJob(name);
+        res.json({ ok: true, message: `Job ${name} executado com sucesso.` });
+    } catch (err) {
+        console.error(`Erro ao rodar cronjob ${name}:`, err);
+        res.status(500).json({ ok: false, error: err.message || 'Erro ao rodar job.' });
+    }
+});
+
+// Atualizar Schedule
+router.post('/crons/:name/schedule', (req, res) => {
+    const { name } = req.params;
+    const { schedule } = req.body;
+    try {
+        cronManager.updateSchedule(name, schedule);
+        res.json({ ok: true, message: `Job ${name} reagendado para ${schedule}.` });
+    } catch (err) {
+        console.error(`Erro ao atualizar schedule do job ${name}:`, err);
+        res.status(400).json({ ok: false, error: err.message || 'Erro ao atualizar schedule.' });
+    }
+});
+
 module.exports = router;

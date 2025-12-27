@@ -178,6 +178,25 @@
 
     <!-- Coluna de Usuários -->
     <div class="section">
+        <h2>⚙️ Gerenciamento de Cronjobs</h2>
+        <table id="cronTable">
+            <thead>
+                <tr>
+                    <th>Job Name</th>
+                    <th>Schedule</th>
+                    <th>Status</th>
+                    <th>Last Run</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Populated by JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Coluna de Usuários -->
+    <div class="section">
         <h2>👥 Usuários Cadastrados</h2>
         <table>
             <thead>
@@ -274,6 +293,67 @@
                 alert('Erro na requisição. Verifique console.');
             }
         }
+
+        // Cron Management
+        async function loadCrons() {
+            try {
+                const res = await fetch('/admin/crons');
+                const data = await res.json();
+                if (data.ok) {
+                    const tbody = document.querySelector('#cronTable tbody');
+                    tbody.innerHTML = '';
+                    data.jobs.forEach(job => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${job.name}</td>
+                            <td>
+                                <input type="text" value="${job.schedule}" id="sched-${job.name}" style="padding:4px; width:100px;">
+                                <button onclick="updateSchedule('${job.name}')" class="btn-reset" style="background-color: #3b82f6; color: white;">Salvar</button>
+                            </td>
+                            <td>${job.status}</td>
+                            <td>${job.lastRun ? new Date(job.lastRun).toLocaleString('pt-BR') : 'Never'}</td>
+                            <td>
+                                <button onclick="runCron('${job.name}')" class="btn-reset" style="background-color: #10b981; color: white;">Executar Agora</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (err) {
+                console.error('Erro ao carregar crons:', err);
+            }
+        }
+
+        async function runCron(name) {
+            if (!confirm(`Executar job ${name} agora?`)) return;
+            try {
+                const res = await fetch(`/admin/crons/${name}/run`, { method: 'POST' });
+                const data = await res.json();
+                alert(data.message || data.error);
+                loadCrons();
+            } catch (err) {
+                alert('Erro na requisição');
+            }
+        }
+
+        async function updateSchedule(name) {
+            const schedule = document.getElementById(`sched-${name}`).value;
+            try {
+                const res = await fetch(`/admin/crons/${name}/schedule`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ schedule })
+                });
+                const data = await res.json();
+                alert(data.message || data.error);
+                loadCrons();
+            } catch (err) {
+                alert('Erro na requisição');
+            }
+        }
+
+        // Load crons on start
+        loadCrons();
     </script>
 </body>
 

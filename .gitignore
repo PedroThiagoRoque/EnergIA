@@ -126,3 +126,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 Refs/prompts_base.txt
+
+#apoio
+apoio/
+apoio/project_documentation.md
