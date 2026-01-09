@@ -115,4 +115,63 @@ router.post('/crons/:name/schedule', (req, res) => {
     }
 });
 
+// =============================================================================
+// ANÁLISE DE PERFIL MANUAL
+// =============================================================================
+
+const { calculaPerfilUsuarioComAnalisePerfilAssistant } = require('../services/profileAnalysis');
+
+// Trigger Manual de Análise de Perfil (Inicial ou Final)
+router.post('/analyze-profile', async (req, res) => {
+    const { userId, type, respostas } = req.body; // type: 'inicial' | 'final'
+
+    if (!userId || !type) {
+        return res.status(400).json({ ok: false, error: 'UserId e Type são obrigatórios.' });
+    }
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ ok: false, error: 'Usuário não encontrado.' });
+
+        console.log(`[ADMIN] Iniciando análise ${type} para usuário ${user.email}...`);
+
+        // Se vieram respostas no body, salva antes
+        if (respostas) {
+            if (type === 'inicial') user.respostasFormularioInicial = respostas;
+            else if (type === 'final') user.respostasFormularioFinal = respostas;
+            await user.save();
+        }
+
+        // Prepara dados para o serviço
+        const dadosInput = {
+            dadosUso: user.dadosUso,
+            respostasFormulario: type === 'inicial' ? user.respostasFormularioInicial : user.respostasFormularioFinal
+        };
+
+        if (!dadosInput.respostasFormulario) {
+            return res.status(400).json({ ok: false, error: `Não há respostas de formulário ${type} salvas para este usuário.` });
+        }
+
+        const novoPerfil = await calculaPerfilUsuarioComAnalisePerfilAssistant(dadosInput);
+
+        // Atualiza campos específicos
+        if (type === 'inicial') user.perfilInicial = novoPerfil;
+        else if (type === 'final') user.perfilFinal = novoPerfil;
+
+        // Atualiza o perfil "vigente"
+        user.perfilUsuario = novoPerfil;
+        user.dadosUso.ultimoCalculoPerfil = new Date();
+        user.perfilAtualizadoEm = new Date();
+
+        await user.save();
+
+        console.log(`[ADMIN] Análise ${type} concluída. Perfil: ${novoPerfil}`);
+        res.json({ ok: true, perfil: novoPerfil, type });
+
+    } catch (err) {
+        console.error('Erro ao analisar perfil manualmente:', err);
+        res.status(500).json({ ok: false, error: err.message || 'Erro ao analisar perfil.' });
+    }
+});
+
 module.exports = router;

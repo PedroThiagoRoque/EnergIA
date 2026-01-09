@@ -1,0 +1,66 @@
+@startuml
+!theme vibrant
+title Fluxo do Agente de Eficiência (EnergIA)
+
+actor "Usuário" as User
+participant "App / Chat Interface" as App
+participant "Backend" as Service
+participant "OpenAI API     " as OpenAI
+database "Vector Store (RAG)" as RAG
+
+== Inicialização (Lazy Loading) ==
+
+Service -> Service: Verificar/Criar Assistente
+alt Assistente não existe em cache/API
+    Service -> OpenAI: Criar Novo Assistente
+    OpenAI --> Service: Retorna ID do Assistente
+end
+
+== Fluxo de Interação (Chat) ==
+
+User -> App: Envia Pergunta
+App -> Service: Processar Mensagem
+
+activate Service
+    Service -> Service: Carregar Perfil do Usuário
+    Service -> Service: Obter Dados Climáticos (Temp, Umidade)
+    
+    note right of Service
+        **Montagem de Contexto (System Patch)**
+        Combina:
+        1. Instruções Base (Persona)
+        2. Perfil (ex: "Proativo")
+        3. Clima (ex: "30°C")
+        4. Contexto RAG (Placeholder)
+    end note
+
+    Service -> OpenAI: Adicionar Mensagem do Usuário
+    
+    Service -> OpenAI: Executar Run (com Contexto)
+    activate OpenAI
+    
+    note right of OpenAI
+        **Processamento no Lado da OpenAI**
+        O modelo analisa a query.
+        Se necessário, aciona a tool 'file_search'.
+    end note
+    
+    opt Consulta à Base de Conhecimento
+        OpenAI <-> RAG: Busca Semântica (Chunks Relevantes)
+        OpenAI -> OpenAI: Geração da Resposta com Contexto
+    end
+    
+    OpenAI --> Service: Run Concluído
+    deactivate OpenAI
+
+    Service -> OpenAI: Listar Mensagens
+    activate OpenAI
+    OpenAI --> Service: Última Resposta do Assistente
+    deactivate OpenAI
+
+    Service --> App: Resposta Formatada
+deactivate Service
+
+App --> User: Exibe Resposta
+
+@enduml

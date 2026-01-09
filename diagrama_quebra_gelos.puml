@@ -1,0 +1,76 @@
+@startuml
+!theme vibrant
+title Fluxo do Agente de Quebra-Gelos e Temas
+
+participant "Cron / Trigger Diário" as Cron
+participant "DailyContent Service" as Service
+participant "OpenAI API" as OpenAI
+participant "Database (DailyData)" as DB
+participant "Vector Store (RAG)" as RAG
+
+== 1. Geração de Conteúdo (Batch) ==
+
+Cron -> Service: Iniciar Geração Diária
+activate Service
+
+Service -> Service: Verificar Vector Store
+alt RAG Habilitado
+    Service -> Service: Montar Contexto
+    note right
+        - Perfil do Usuário
+        - Clima Atual
+        - Prompt Específico (icebreakers.user)
+    end note
+
+    Service -> OpenAI: Solicitar Temas
+    activate OpenAI
+    
+    note right of OpenAI
+        Agente: Eficiência
+        Ação: Priorizar recomendações práticas
+        baseadas em normas (RAG)
+    end note
+    
+    opt Consulta RAG
+        OpenAI <-> RAG: Buscar Normas/Dicas Técnicas
+    end
+    
+    OpenAI --> Service: Retorna Lista de Temas
+    deactivate OpenAI
+    
+    Service -> Service: Processar e Limpar Texto
+    
+    alt Falha ou Lista Vazia
+        Service -> Service: Fallback: Gerador Local Determinístico
+    end
+
+else RAG Desabilitado
+    Service -> Service: Fallback: Gerador Local Determinístico
+    note right
+        Baseado em regras simples:
+        - "Proativo" -> Desafios
+        - "Descuidado" -> Dicas Básicas
+    end note
+end
+
+Service -> DB: Salvar Temas do Dia
+activate DB
+DB --> Service: Confirmação
+deactivate DB
+
+Service --> Cron: Finalizado
+deactivate Service
+
+== 2. Consumo (Frontend) ==
+
+actor "Usuário" as User
+participant "App Interface" as App
+
+User -> App: Abre o App
+App -> DB: Consultar DailyData (Hoje)
+activate DB
+DB --> App: Retorna Lista de Temas
+deactivate DB
+
+App -> User: Exibe Sugestões de Conversa
+@enduml

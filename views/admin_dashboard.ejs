@@ -205,6 +205,7 @@
                     <th>Email</th>
                     <th>Role</th>
                     <th>Ação</th>
+                    <th>Análise Perfil</th>
                     <th>Perfil</th>
                     <th>Última Interação</th>
                 </tr>
@@ -226,6 +227,16 @@
                         <td>
                             <button onclick="resetPassword('<%= user._id %>', '<%= user.name %>')"
                                 class="btn-reset">Resetar Senha</button>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 5px; flex-direction: column;">
+                                <button
+                                    onclick="triggerProfileAnalysis('<%= user._id %>', '<%= user.email %>', 'inicial')"
+                                    class="btn-reset" style="background-color: #3b82f6; color: white;">Inicial</button>
+                                <button
+                                    onclick="triggerProfileAnalysis('<%= user._id %>', '<%= user.email %>', 'final')"
+                                    class="btn-reset" style="background-color: #8b5cf6; color: white;">Final</button>
+                            </div>
                         </td>
                         <td>
                             <%= user.perfilUsuario %>
@@ -349,6 +360,28 @@
                 loadCrons();
             } catch (err) {
                 alert('Erro na requisição');
+            }
+        }
+
+
+        async function triggerProfileAnalysis(userId, email, type) {
+            if (!confirm(`Rodar análise DE PERFIL (${type.toUpperCase()}) para ${email}? Isso pode demorar.`)) return;
+            try {
+                const res = await fetch('/admin/analyze-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, type })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    alert(`Análise concluída! Novo perfil: ${data.perfil}`);
+                    window.location.reload();
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erro na requisição.');
             }
         }
 

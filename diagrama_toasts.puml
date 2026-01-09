@@ -1,0 +1,66 @@
+@startuml
+!theme vibrant
+title Fluxo do Agente Criador de Notificações (Toast Agent)
+
+participant "Cron Job / Trigger" as Cron
+participant "DailyContent Service" as Service
+participant "OpenAI API" as OpenAI
+participant "Database (DailyData)" as DB
+participant "App / Client" as App
+
+== 1. Geração de Conteúdo (Batch) ==
+
+Cron -> Service: gerarEGravarDailyContent()
+activate Service
+
+Service -> Service: Coletar Contexto
+note right
+  - Perfil do Usuário
+  - Clima Atual
+  - Prompt Base (toast.user)
+end note
+
+Service -> OpenAI: Enviar Prompt + Contexto
+activate OpenAI
+note right of OpenAI
+  Agente: Eficiência
+  Role: Redator de Microcopy
+  Output: JSON { toasts: [...] }
+end note
+OpenAI --> Service: Retorna JSON com Toasts
+deactivate OpenAI
+
+Service -> Service: Validar e Filtrar (Top 5)
+
+Service -> DB: Update/Upsert (Data de Hoje)
+note right
+  Salva array de toasts
+  para o dia corrente
+end note
+activate DB
+DB --> Service: Confirmação
+deactivate DB
+
+Service --> Cron: Concluído
+deactivate Service
+
+== 2. Consumo (Notificação) ==
+
+App -> Service: gerarNotificacaoToast()
+activate Service
+
+Service -> DB: Buscar dados de Hoje
+activate DB
+DB --> Service: Documento DailyData
+deactivate DB
+
+alt Toast Encontrado
+    Service -> Service: Selecionar Randomicamente
+else Falha / Sem Dados
+    Service -> Service: Usar Fallback Local
+end
+
+Service --> App: String da Notificação
+deactivate Service
+
+@enduml

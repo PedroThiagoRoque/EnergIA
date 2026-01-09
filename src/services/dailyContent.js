@@ -69,7 +69,7 @@ async function gerarIcebreakersRAGorLocal(perfil, weather) {
 }
 
 async function gerarDicaDoDiaLLM({ perfil, weather }) {
-    const fallback = '💡 Dica rápida: desligue aparelhos em stand-by quando não estiverem em uso para reduzir consumo oculto.';
+    const fallback = '💡 Dica: Desligue aparelhos em stand-by para economizar.';
     console.log('[DicaDia] Iniciando geração de dica do dia via LLM...');
 
     try {

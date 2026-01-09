@@ -25,7 +25,15 @@ const UserSchema = new mongoose.Schema({
     perguntasBasicas: { type: Number, default: 0 }, // quantidade de perguntas básicas
     engajamentoDesafios: { type: Number, default: 0 }, // aceita desafios/dicas
     ultimaInteracao: { type: Date, default: Date.now }
-  }
+  },
+
+  // Armazenamento das respostas do formulário de práticas ambientais
+  respostasFormularioInicial: { type: Object, default: null }, // Respostas do início do experimento
+  respostasFormularioFinal: { type: Object, default: null },   // Respostas do final do experimento
+
+  // Resultados das análises específicas
+  perfilInicial: { type: String, default: null },
+  perfilFinal: { type: String, default: null }
 });
 
 module.exports = mongoose.model('User', UserSchema);

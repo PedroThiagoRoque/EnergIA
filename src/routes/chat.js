@@ -87,6 +87,7 @@ async function atualizarDadosUso(userId, textoPergunta) {
   const chat = await Chat.findOne({ userId });
   const totalHistorico = chat ? chat.messages.filter(m => m.sender === 'user').length : 0;
 
+  //TODO remover a analise de complexidade das perguntas
   const complex = analisarComplexidadePergunta(textoPergunta);
   const atual = user.dadosUso || {};
 
