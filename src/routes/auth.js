@@ -21,6 +21,8 @@ router.post('/register', async (req, res) => {
       ageRange,
       gender,
       vinculo,
+      respostasFormularioInicial: { _placeholder: true },
+      respostasFormularioFinal: { _placeholder: true }
     });
     res.redirect('/login?registered=true');
   } catch (err) {

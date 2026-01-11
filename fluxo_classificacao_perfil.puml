@@ -1,0 +1,77 @@
+@startuml
+!theme vibrant
+title Fluxo do Agente de Classificação de Perfil
+
+participant "Cliente / Frontend" as App
+participant "Backend  " as Service
+participant "Database" as DB
+participant "OpenAI API" as OpenAI
+
+== Gatilho de Classificação ==
+
+App -> Service: Solicitar Análise de Perfil
+note left
+  Input:
+  a) Métricas de Uso (Chat)
+  b) Respostas do Formulário
+end note
+
+activate Service
+
+    Service -> Service: Verificar Cache do Assistente
+    
+    alt Setup Inicial
+        Service -> OpenAI: Criar Assistente "AnalisePerfil"
+        OpenAI --> Service: ID do Assistente
+    end
+
+    == Processamento de Dados (Pré-LLM) ==
+
+    alt Dados do Formulário Recebidos
+        Service -> Service: Calcular Scores
+        note right
+          1. Atitudes (Likert)
+          2. Frequência de Ações
+          3. Consciência Institucional
+          4. Conhecimento Técnico (Quiz)
+        end note
+    else Apenas Dados de Uso
+        Service -> Service: Formatar Métricas
+        note right
+          - Total Interações
+          - Engajamento
+          - Temas Predominantes
+        end note
+    end
+
+    Service -> Service: Montar Prompt de Análise
+    note right
+        Instrução: Classificar em
+        'Descuidado', 'Intermediário'
+        ou 'Proativo' com base nos scores/dados.
+    end note
+
+    == Inferência (LLM) ==
+
+    Service -> OpenAI: Enviar Dados (Prompt)
+    Service -> OpenAI: Executar Análise
+    activate OpenAI
+    OpenAI --> Service: Resultado da Classificação
+    deactivate OpenAI
+
+    Service -> Service: Normalizar Resposta
+    note right
+       Filtra saída para garantir
+       apenas as 3 categorias válidas.
+    end note
+
+    Service -> DB: Salvar Perfil Atualizado
+    activate DB
+    DB --> Service: Confirmação
+    deactivate DB
+
+    Service --> App: Retorna Perfil (Label)
+
+deactivate Service
+
+@enduml

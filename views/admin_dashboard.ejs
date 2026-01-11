@@ -178,7 +178,11 @@
 
     <!-- Coluna de Usuários -->
     <div class="section">
-        <h2>⚙️ Gerenciamento de Cronjobs</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>⚙️ Gerenciamento de Cronjobs</h2>
+            <button onclick="runMigration()" class="btn-reset" style="background-color: #ec4899; color: white;">⚡ Migrar
+                Formulários (Correção)</button>
+        </div>
         <table id="cronTable">
             <thead>
                 <tr>
@@ -382,6 +386,18 @@
             } catch (err) {
                 console.error(err);
                 alert('Erro na requisição.');
+            }
+        }
+
+        async function runMigration() {
+            if (!confirm('Deseja verificar e adicionar campos de formulário faltantes em todos os usuários?')) return;
+            try {
+                const res = await fetch('/admin/migrate-forms', { method: 'POST' });
+                const data = await res.json();
+                alert(data.message || data.error);
+                if (data.ok) window.location.reload();
+            } catch (err) {
+                alert('Erro na requisição');
             }
         }
 

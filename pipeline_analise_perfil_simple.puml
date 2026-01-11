@@ -1,0 +1,37 @@
+@startuml
+title Pipeline de Análise de Perfil (Simplificado)
+
+skinparam defaultTextAlignment center
+skinparam shadowing false
+skinparam linetype ortho
+
+start
+
+:Receber Respostas do Formulário
+(& Dados de Uso Opcionais);
+
+:Calcular Métricas Determinísticas;
+note right
+  1. Atitudes (Likert)
+  2. Ações (Frequência)
+  3. Consciência (Campus)
+  4. Conhecimento (Técnico)
+end note
+
+:Consultar Agente de IA;
+note right
+  Contexto com scores e respostas
+  → Classificação via LLM
+end note
+
+:Normalizar Resposta;
+note right
+  Fuzzy Matching para:
+  Descuidado, Intermediário ou Proativo
+end note
+
+:Persistir Perfil do Usuário;
+
+stop
+
+@enduml

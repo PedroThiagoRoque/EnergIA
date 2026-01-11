@@ -1,0 +1,81 @@
+@startuml
+title Pipeline do Agente de Análise de Perfil (EnergIA)
+
+skinparam defaultTextAlignment center
+skinparam noteTextAlignment left
+skinparam shadowing false
+skinparam linetype ortho
+
+start
+
+:Início (Cron Job / Trigger);
+
+:Receber Dados de Entrada;
+note right
+  * **respostasFormulario**
+  * **dadosUso** (Opcional)
+end note
+
+partition "1. Pré-processamento e Métricas Determinísticas" {
+  split
+    :Calcular **Atitudes e Crenças**;
+    note right: Escala Likert (com inversão)\nScore = Soma(Val(q_i))
+  split again
+    :Calcular **Frequência de Ações**;
+    note right: Escala Ordinal (1-4)\nScore = Soma(Freq(item_j))
+  split again
+    :Calcular **Consciência Institucional**;
+    note right: Binário (Sim/Não)\nScore = Soma(Sim)
+  split again
+    :Calcular **Conhecimento Técnico**;
+    note right: Validação Lógica\nComparação com Gabarito
+  end split
+  
+  :Consolidar Scores e Percentuais;
+}
+
+partition "2. Análise Qualitativa (Inteligência Artificial)" {
+  :Construir Contexto (Prompt);
+  note right
+    Injeção dinâmica de:
+    * Scores numéricos
+    * Percentuais de aproveitamento
+    * Respostas qualitativas abertas
+  end note
+
+  :Consultar Agente **'AnalisePerfil'**;
+  note right
+    **Modelo:** LLM (GPT)
+    **Instrução:** Classificar perfil sem
+    deriva discursiva.
+    **Decisão:** Arquitetural (Síntese controlada)
+  end note
+  
+  :Receber Classificação (Texto);
+}
+
+partition "3. Normalização e Saída" {
+  :Aplicar **Fuzzy Matching**;
+  note right
+    Normalização robusta para evitar ruído.
+    Mapeamento para vocabulário canônico:
+    * **Descuidado**
+    * **Intermediário**
+    * **Proativo**
+  end note
+  
+  :Persistir Perfil no Banco de Dados;
+}
+
+:Retroalimentação do Sistema;
+note right
+  **Impacto Arquitetural:**
+  O perfil persistido modula:
+  * Sugestões diárias
+  * Recomendações personalizadas
+  * Abordagem do Chatbot
+end note
+
+stop
+
+@enduml

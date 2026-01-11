@@ -174,4 +174,38 @@ router.post('/analyze-profile', async (req, res) => {
     }
 });
 
+router.post('/migrate-forms', async (req, res) => {
+    try {
+        const users = await User.find({});
+        let updatedCount = 0;
+
+        for (const user of users) {
+            // Ensure fields are initialized as empty objects if missing
+            if (!user.respostasFormularioInicial || Object.keys(user.respostasFormularioInicial).length === 0) {
+                user.respostasFormularioInicial = { _placeholder: true };
+                user.markModified('respostasFormularioInicial');
+                changed = true;
+            }
+            if (!user.respostasFormularioFinal || Object.keys(user.respostasFormularioFinal).length === 0) {
+                user.respostasFormularioFinal = { _placeholder: true };
+                user.markModified('respostasFormularioFinal');
+                changed = true;
+            }
+            // Fix validation error for legacy users
+            if (!user.vinculo) {
+                user.vinculo = 'Outro';
+                changed = true;
+            }
+            if (changed) {
+                await user.save();
+                updatedCount++;
+            }
+        }
+        res.json({ ok: true, message: `Migração concluída. ${updatedCount} usuários atualizados.` });
+    } catch (err) {
+        console.error('Erro na migração manual:', err);
+        res.status(500).json({ ok: false, error: 'Erro ao executar migração.' });
+    }
+});
+
 module.exports = router;
