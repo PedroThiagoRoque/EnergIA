@@ -1,436 +1,211 @@
-# Guia da API - EnergIA Platform
+# Guia da API - EnergIA
 
-## Visão Geral
-
-A API do EnergIA é construída com Node.js/Express e oferece endpoints para autenticação, chat com IA e funcionalidades de dashboard. O projeto funciona na porta 3000 por padrão.
+Este documento detalha todas as rotas, endpoints e estruturas de dados do projeto EnergIA.
 
 ## Base URL
-```
-http://localhost:3000
-```
+`http://localhost:3000`
 
-## Autenticação
+---
 
-### 1. Registro de Usuário
-```http
-POST /register
-Content-Type: application/x-www-form-urlencoded
-```
+## 1. Autenticação e Gestão de Conta
 
-**Parâmetros:**
-- `name` (string): Nome do usuário
-- `email` (string): Email do usuário  
-- `password` (string): Senha (será hasheada com bcrypt)
-- `group` (string): Grupo do usuário
-- `ageRange` (string): Faixa etária
-- `gender` (string): Gênero
+Rotas baseadas em `src/routes/auth.js` e montadas na raiz `/`.
 
-**Resposta de Sucesso:**
-- Redirect para `/login`
+### 1.1 Registro
+- **URL**: `/register`
+- **Métodos**:
+  - `GET`: Renderiza a tela de registro.
+  - `POST`: Cria um novo usuário.
+    - **Body**:
+      - `name`: Nome completo.
+      - `email`: Email (único).
+      - `password`: Senha.
+      - `group`: Grupo (ex: Discente, Docente).
+      - `ageRange`: Faixa etária.
+      - `gender`: Gênero.
+      - `vinculo`: Tipo de vínculo.
 
-**Resposta de Erro:**
-- Renderiza página de registro com mensagem de erro
+### 1.2 Login
+- **URL**: `/login`
+- **Métodos**:
+  - `GET`: Renderiza a tela de login.
+  - `POST`: Autentica o usuário.
+    - **Body**:
+      - `email`: Email cadastrado.
+      - `password`: Senha.
+    - **Sucesso**: Redireciona para `/dashboard`.
+    - **Sessão**: Define `userId`, `userName`, `role`.
 
-### 2. Login de Usuário
-```http
-POST /login
-Content-Type: application/x-www-form-urlencoded
-```
+### 1.3 Logout
+- **URL**: `/logout`
+- **Método**: `GET`
+- **Ação**: Destroi a sessão e redireciona para `/login`.
 
-**Parâmetros:**
-- `email` (string): Email do usuário
-- `password` (string): Senha
+### 1.4 Gestão de Senha
+- **Alteração de Senha**: `/change-password`
+  - `GET`: Tela de alteração (Requer login).
+  - `POST`: Atualiza a senha.
+    - **Body**: `currentPassword`, `newPassword`, `confirmNewPassword`.
+- **Recuperação de Senha**: `/forgot-password`
+  - `GET`: Tela de "Esqueci minha senha".
+  - `POST`: Registra solicitação de reset.
+    - **Body**: `email`.
 
-**Resposta:**
-- Cria sessão e redireciona para `/dashboard`
+---
 
-### 3. Logout
-```http
-GET /logout
-```
+## 2. Navegação do Usuário
 
-**Resposta:**
-- Destroi a sessão e redireciona para página inicial
+Rotas definidas em `server.js`.
 
-## Chat com IA
+- **Home**: `GET /` - Renderiza a página inicial pública.
+- **Dashboard**: `GET /dashboard` (Requer Login)
+  - Renderiza painel principal com:
+    - Saudação ao usuário.
+    - Dados meteorológicos (Temperatura/Ícone).
+    - Links para Chat e Editor.
 
-### 1. Enviar Mensagem ao Chat
-```http
-POST /chat/message
-Content-Type: application/json
-Authorization: Sessão ativa necessária
-```
+---
 
-**Body:**
-```json
-{
-  "message": "Sua pergunta sobre eficiência energética"
-}
-```
+## 3. Chat Inteligente
 
-**Resposta:**
-```json
-{
-  "response": "Resposta do assistente de IA",
-  "assistantType": "Nome do assistente"
-}
-```
+Rotas baseadas em `src/routes/chat.js` e montadas em `/chat`. **Requer Login.**
 
-**Exemplo de uso:**
-```javascript
-const response = await fetch('/chat/message', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ 
-    message: "Como posso reduzir o consumo de energia em casa?" 
-  }),
-  credentials: 'include'
-});
-const data = await response.json();
-console.log(data.response); // Resposta do assistente
-```
+### 3.1 Interface do Chat
+- **URL**: `/chat`
+- **Método**: `GET`
+- **Ação**: Renderiza o histórico de mensagens e área de interação.
 
-### 2. Chat com OpenAI (Editor)
-```http
-POST /editor/openai
-Content-Type: application/json
-Authorization: Sessão ativa necessária
-```
+### 3.2 Enviar Mensagem (SSE)
+- **URL**: `/chat/message`
+- **Método**: `POST`
+- **Body**:
+  - `message`: Texto da mensagem do usuário.
+- **Retorno**: *Server-Sent Events (SSE)*.
+  - O servidor envia chunks de texto (token a token) conforme a geração da IA.
+  - Evento final contém metadados (`done: true`, `perfilUsuario`, `weather`).
+- **Funcionalidade**:
+  - Persiste histórico.
+  - Analisa intenção.
+  - Consulta RAG ou Assistente de Perfil.
 
-**Body:**
-```json
-{
-  "userInput": "Pergunta do usuário",
-  "promptSistema": "Prompt de sistema personalizado"
-}
-```
-
-**Resposta:**
-```json
-{
-  "response": "Resposta do GPT-3.5-turbo"
-}
-```
-
-### 3. Chat com Claude (Bedrock)
-```http
-POST /editor/bedrock
-Content-Type: application/json
-Authorization: Sessão ativa necessária
-```
-
-**Body:**
-```json
-{
-  "userInput": "Pergunta do usuário",
-  "promptSistema": "Prompt de sistema personalizado"
-}
-```
-
-**Resposta:**
-```json
-{
-  "claudeResponse": "Resposta do Claude via AWS Bedrock"
-}
-```
-
-## Páginas Principais
-
-### 1. Dashboard do Usuário
-```http
-GET /dashboard
-Authorization: Sessão ativa necessária
-```
-
-**Resposta:** Renderiza página EJS com:
-- Informações do usuário logado
-- Temperatura atual de Pelotas
-- Dados de consumo energético
-- Botões de navegação para funcionalidades
-
-### 2. Editor de Prompts
-```http
-GET /editor
-Authorization: Sessão ativa necessária
-```
-
-**Resposta:** Renderiza interface para testar diferentes modelos de IA (OpenAI e Claude)
-
-### 3. Chat Interface
-```http
-GET /chat
-Authorization: Sessão ativa necessária
-```
-
-**Resposta:** Renderiza interface de chat com assistente especializado em eficiência energética
-
-## Middleware de Autenticação
-
-Todos os endpoints protegidos utilizam middleware que:
-- Verifica se existe uma sessão ativa
-- Se não autenticado, redireciona para `/login`
-- Disponibiliza dados do usuário via `req.session.user`
-
-## Configuração da API
-
-### Variáveis de Ambiente Necessárias:
-```env
-# OpenAI
-OPENAI_API_KEY=sua_chave_openai
-
-# AWS Bedrock
-AWS_ACCESS_KEY_ID=sua_chave_aws
-AWS_SECRET_ACCESS_KEY=sua_chave_secreta_aws
-
-# MongoDB
-MONGO_URI=mongodb://localhost:27017/energia
-
-# Sessão
-SESSION_SECRET=seu_segredo_sessao_super_secreto
-
-# Servidor
-PORT=3000
-```
-
-### Modelos de IA Utilizados:
-- **OpenAI**: GPT-3.5-turbo via API oficial
-- **Claude**: Claude-3-haiku via AWS Bedrock (região us-east-1)
-- **Assistente personalizado**: Focado em eficiência energética e sustentabilidade
-
-## Banco de Dados
-
-### Modelos MongoDB:
-
-#### User
-```javascript
-{
-  name: String,
-  email: String (único),
-  password: String (hasheado),
-  group: String,
-  ageRange: String,
-  gender: String,
-  createdAt: Date
-}
-```
-
-#### Chat
-```javascript
-{
-  userId: ObjectId,
-  message: String,
-  response: String,
-  assistantType: String,
-  timestamp: Date
-}
-```
-
-## Exemplo de Integração Completa
-
-### Cliente JavaScript/React Native
-```javascript
-class EnergiaAPI {
-  constructor(baseURL = 'http://localhost:3000') {
-    this.baseURL = baseURL;
+### 3.3 Icebreakers Diários
+- **URL**: `/chat/daily/icebreakers`
+- **Método**: `GET`
+- **Retorno** (JSON):
+  ```json
+  {
+    "temas": ["Tema 1", "Tema 2", "Tema 3"]
   }
+  ```
+- **Lógica**: Retorna sugestões de conversa geradas por IA (via CronJob) ou fallback local.
 
-  // Autenticação
-  async register(userData) {
-    const formData = new URLSearchParams();
-    Object.keys(userData).forEach(key => {
-      formData.append(key, userData[key]);
-    });
+### 3.4 Healthcheck
+- **URL**: `/chat/health`
+- **Método**: `GET`
+- **Retorno**: JSON `{ ok: true, service: 'chat', time: ... }`
 
-    const response = await fetch(`${this.baseURL}/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData,
-      credentials: 'include'
-    });
-    return response.ok;
-  }
+---
 
-  async login(email, password) {
-    const formData = new URLSearchParams();
-    formData.append('email', email);
-    formData.append('password', password);
+## 4. Editor de Prompts (Playground)
 
-    const response = await fetch(`${this.baseURL}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData,
-      credentials: 'include'
-    });
-    return response.ok;
-  }
+Rotas baseadas em `src/routes/editor.js` e montadas em `/editor`. **Requer Login.**
 
-  async logout() {
-    const response = await fetch(`${this.baseURL}/logout`, {
-      method: 'GET',
-      credentials: 'include'
-    });
-    return response.ok;
-  }
+### 4.1 Interface
+- **URL**: `/editor`
+- **Método**: `GET`
+- **Ação**: Renderiza ferramenta para testar prompts manuais.
 
-  // Chat
-  async sendChatMessage(message) {
-    const response = await fetch(`${this.baseURL}/chat/message`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message }),
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error('Erro ao enviar mensagem');
-    }
-    
-    return response.json();
-  }
+### 4.2 Teste OpenAI
+- **URL**: `/editor/openai`
+- **Método**: `POST`
+- **Body**: `{ "userInput": "...", "promptSistema": "..." }`
+- **Retorno**: JSON `{ "response": "..." }`
 
-  // Editor - OpenAI
-  async chatWithOpenAI(userInput, promptSistema = '') {
-    const response = await fetch(`${this.baseURL}/editor/openai`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userInput, promptSistema }),
-      credentials: 'include'
-    });
-    return response.json();
-  }
+### 4.3 Teste AWS Bedrock (Claude)
+- **URL**: `/editor/bedrock`
+- **Método**: `POST`
+- **Body**: `{ "userInput": "...", "promptSistema": "..." }`
+- **Retorno**: JSON `{ "claudeResponse": "..." }`
 
-  // Editor - Claude
-  async chatWithClaude(userInput, promptSistema = '') {
-    const response = await fetch(`${this.baseURL}/editor/bedrock`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userInput, promptSistema }),
-      credentials: 'include'
-    });
-    return response.json();
-  }
-}
+---
 
-// Exemplo de uso
-const api = new EnergiaAPI();
+## 5. Administração
 
-// Login
-await api.login('usuario@email.com', 'senha123');
+Rotas baseadas em `src/routes/admin.js` e montadas em `/admin`. **Requer Login e Role 'godmode'.**
 
-// Enviar mensagem no chat
-const chatResponse = await api.sendChatMessage('Como economizar energia?');
-console.log(chatResponse.response);
-```
+### 5.1 Dashboard Admin
+- **URL**: `/admin`
+- **Método**: `GET`
+- **Ação**: Exibe lista de usuários, logs de erro e solicitações de reset de senha.
 
-## Fluxo de Chat Frontend
+### 5.2 Reset de Senha de Usuário
+- **URL**: `/admin/reset-password`
+- **Método**: `POST`
+- **Body**: `{ "userId": "..." }`
+- **Ação**: Reseta a senha do usuário para `Mudar123!` e força troca no próximo login.
 
-O arquivo `public/js/chat.js` demonstra como implementar:
+### 5.3 Gerenciamento de Cron Jobs
+- **Listar Jobs**: `GET /admin/crons`
+- **Executar Job**: `POST /admin/crons/:name/run`
+- **Agendar Job**: `POST /admin/crons/:name/schedule`
+  - **Body**: `{ "schedule": "*/5 * * * *" }`
 
-1. **Interface de Loading**: Spinner durante processamento
-2. **Formatação de Mensagens**: Suporte a markdown básico (`**texto**` → `<b>texto</b>`)
-3. **Scroll Automático**: Mantém o chat sempre no final
-4. **Tratamento de Erros**: Mostra mensagem amigável em caso de falha
+### 5.4 Análise de Perfil Manual
+- **URL**: `/admin/analyze-profile`
+- **Método**: `POST`
+- **Body**:
+  - `userId`: ID do usuário.
+  - `type`: 'inicial' ou 'final'.
+  - `respostas` (opcional): Objeto com respostas do formulário.
+- **Ação**: Executa a lógica de classificação de perfil (Scoring + LLM) e atualiza o usuário.
 
-### Exemplo do Frontend:
-```javascript
-// Adicionar mensagem do usuário
-chatWindow.innerHTML += `
-  <div class="message user-message">
-    <div class="message-content">
-      <div class="assistant-type">Você</div>
-      ${message}
-    </div>
-  </div>
-`;
+### 5.5 Migração de Dados
+- **URL**: `/admin/migrate-forms`
+- **Método**: `POST`
+- **Ação**: Garante que campos de formulário e vínculo existam para todos os usuários legados.
 
-// Adicionar spinner de loading
-const spinnerId = 'spinner-' + Date.now();
-chatWindow.innerHTML += `
-  <div class="message assistant-message" id="${spinnerId}">
-    <div class="message-content">
-      <img src="/public/load.gif" alt="Carregando..." style="width:50px;height:50px;">
-    </div>
-  </div>
-`;
+---
 
-// Substituir spinner pela resposta
-document.getElementById(spinnerId).innerHTML = `
-  <div class="message-content">
-    <div class="assistant-type">${data.assistantType}</div>
-    ${formatResponse(data.response)}
-  </div>
-`;
-```
+## 6. API Pública (Mobile/Externa)
 
-## Códigos de Resposta HTTP
+Rotas baseadas em `src/routes/api.js` e montadas em `/api`.
 
-- **200**: Sucesso
-- **302**: Redirecionamento (usado após login/logout)
-- **400**: Erro de validação
-- **401**: Não autorizado (sessão inválida)
-- **500**: Erro interno do servidor
+- **Teste**: `GET /api` - Retorna JSON `{ "message": "API is working" }`.
 
-## Recursos Avançados
+---
 
-### Sistema de Sessões
-- Utiliza `express-session` com MongoDB store
-- Sessões persistem por 24 horas
-- Dados do usuário disponíveis em `req.session.user`
+## 7. Middleware
 
-### Integração com APIs Externas
-- **OpenWeather API**: Para dados meteorológicos
-- **OpenAI API**: Para GPT-3.5-turbo
-- **AWS Bedrock**: Para Claude-3-haiku
+### Autenticação (`src/middleware/auth.js`)
+- `requireLogin`: Verifica se `req.session.userId` existe. Redireciona para `/login` se falhar.
+- `requireAdmin`: Verifica se `req.session.role === 'godmode'`. Acesso negado se falhar.
 
-### Segurança
-- Senhas hasheadas com bcrypt
-- Validação de entrada de dados
-- Middleware de autenticação em rotas protegidas
-- CORS configurado para desenvolvimento
+### Dados Meteorológicos (`src/middleware/weatherMiddleware.js`)
+- Injeta dados de clima (temperatura, ícone) em `res.locals` para renderização global.
+- Atualiza a cada 30 minutos via cache simples na memória.
 
-## Estrutura de Arquivos da API
+---
 
-```
-src/
-├── config/
-│   └── db.js              # Configuração MongoDB
-├── middleware/
-│   └── auth.js            # Middleware de autenticação
-├── models/
-│   ├── Chat.js            # Modelo de chat
-│   └── User.js            # Modelo de usuário
-└── routes/
-    ├── auth.js            # Rotas de autenticação
-    ├── chat.js            # Rotas de chat
-    ├── editor.js          # Rotas do editor
-    └── openaiapi.js       # Integração OpenAI
-```
+## 8. Modelos de Dados (MongoDB)
 
-## Notas Importantes
+### User
+- `name`, `email`, `password`, `role`.
+- `respostasFormularioInicial`, `respostasFormularioFinal`: Dados dos formulários de perfil.
+- `perfilUsuario`, `perfilInicial`, `perfilFinal`: Classificações (Ex: Proativo).
+- `dadosUso`: Métricas de interação (total de mensagens, horário preferido, etc.).
 
-- ✅ Sistema de sessões Express com MongoDB
-- ✅ Integração com múltiplos modelos de IA  
-- ✅ Prompt system personalizável
-- ✅ Interface responsiva com Bootstrap
-- ✅ Histórico de conversas persistente no MongoDB
-- ✅ API REST para integração externa
-- ✅ Middleware de autenticação robusto
-- ✅ Tratamento de erros adequado
+### Chat
+- `userId`: Referência ao User.
+- `messages`: Array de objetos `{ sender, content, timestamp }`.
+- `threadId`: ID da thread OpenAI (se aplicável).
 
-## Troubleshooting
+### DailyData
+- Armazena conteúdo diário gerado por IA (Icebreakers, Dicas) para consistência global.
 
-### Problemas Comuns:
+---
 
-1. **Erro de CORS**: Configurar adequadamente as origens permitidas
-2. **Sessão não persiste**: Verificar configuração do MongoDB store
-3. **API Keys inválidas**: Verificar variáveis de ambiente
-4. **Conexão MongoDB**: Verificar string de conexão e disponibilidade do banco
+## Notas de Desenvolvimento
 
-### Logs Úteis:
-```javascript
-console.log('Usuário logado:', req.session.user);
-console.log('Mensagem recebida:', req.body.message);
-console.log('Resposta da IA:', response);
-```
-
-Este guia fornece todas as informações necessárias para integrar qualquer aplicação com a API EnergIA existente.
+- **SSE (Server-Sent Events)**: O chat utiliza SSE para streamar a resposta da IA, melhorando a UX.
+- **Cron Jobs**: Tarefas como "Daily Content" e atualizações de perfil rodam em background.
+- **RAG**: O chat utiliza Retrieval-Augmented Generation para embasar respostas em documentos técnicos.
