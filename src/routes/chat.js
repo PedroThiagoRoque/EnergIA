@@ -173,6 +173,12 @@ router.get('/', async (req, res) => {
     return res.status(401).send('Usuário não autenticado');
   }
 
+  // Redirecionamento A/B: Volts -> /chat-gen
+  const userChecks = await User.findById(userId);
+  if (userChecks && userChecks.group === 'Volts') {
+    return res.redirect('/chat-gen');
+  }
+
   try {
     let chat = await Chat.findOne({ userId });
     let messages = chat ? chat.messages : [];

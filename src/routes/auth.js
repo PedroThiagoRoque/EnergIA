@@ -10,14 +10,27 @@ router.get('/register', (req, res) => res.render('register'));
 
 // Registro de Novo Usuário
 router.post('/register', async (req, res) => {
-  const { name, email, password, group, ageRange, gender, vinculo } = req.body;
+  const { name, email, password, ageRange, gender, vinculo } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
+    // Lógica de Balanceamento 50/50
+    const countWatts = await User.countDocuments({ group: 'Watts' });
+    const countVolts = await User.countDocuments({ group: 'Volts' });
+
+    let assignedGroup;
+    if (countWatts < countVolts) {
+      assignedGroup = 'Watts';
+    } else if (countVolts < countWatts) {
+      assignedGroup = 'Volts';
+    } else {
+      assignedGroup = Math.random() < 0.5 ? 'Watts' : 'Volts';
+    }
+
     const newUser = await User.create({
-      name, // Nome do usuário
-      email, // Email do usuário
+      name,
+      email,
       password: hashedPassword,
-      group,
+      group: assignedGroup,
       ageRange,
       gender,
       vinculo,

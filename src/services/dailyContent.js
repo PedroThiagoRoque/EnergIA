@@ -184,8 +184,24 @@ async function gerarToastsBatch(perfil, weather) {
     }
 }
 
-async function gerarNotificacaoToast({ perfil, weather }) {
-    // Se falhar a IA, usa fallback
+const voltsMessages = require('../config/voltsMessages');
+
+async function gerarNotificacaoToast({ perfil, weather, group }) {
+    // Lógica para Grupo Volts (Controle)
+    if (group === 'Volts') {
+        const today = new Date();
+        // Hash simples do dia para selecionar mensagem fixa (aleatória a cada dia, mas consistente no dia)
+        // Usando dia do ano (1-366)
+        const start = new Date(today.getFullYear(), 0, 0);
+        const diff = today - start;
+        const oneDay = 1000 * 60 * 60 * 24;
+        const dayOfYear = Math.floor(diff / oneDay);
+
+        const index = dayOfYear % voltsMessages.length;
+        return voltsMessages[index];
+    }
+
+    // Se falhar a IA ou for Watts
     const fallbacks = [
         "Economize energia: desligue luzes ao sair!",
         "Um banho mais curto poupa água e energia.",

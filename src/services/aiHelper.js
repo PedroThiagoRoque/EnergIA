@@ -53,6 +53,32 @@ async function getOrCreateAssistantEficiencia() {
     return created.id;
 }
 
+function buildBaseInstructionsVolts() {
+    return prompts.assistants.volts.instructions;
+}
+
+async function getOrCreateAssistantVolts() {
+    const name = 'Volts';
+    if (assistantCache[name]) return assistantCache[name];
+
+    const existing = await openai.beta.assistants.list();
+    const found = existing.data.find(a => a.name === name);
+    if (found) {
+        assistantCache[name] = found.id;
+        return found.id;
+    }
+
+    const created = await openai.beta.assistants.create({
+        name,
+        model: process.env.LLM_MODEL_VOLTS || 'gpt-4o-mini',
+        instructions: buildBaseInstructionsVolts(),
+        // Sem RAG (file_search) para Volts
+    });
+
+    assistantCache[name] = created.id;
+    return created.id;
+}
+
 async function addMessageToThread(threadId, role, content) {
     return openai.beta.threads.messages.create(threadId, { role, content: toText(content) });
 }
@@ -113,5 +139,6 @@ module.exports = {
     runAssistantOnThread,
     addMessageAndRunAssistant,
     runAssistantOnThreadStream,
-    addMessageAndRunAssistantStream
+    addMessageAndRunAssistantStream,
+    getOrCreateAssistantVolts
 };

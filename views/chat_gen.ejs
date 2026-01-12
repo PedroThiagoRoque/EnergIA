@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistente Virtual</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Script de chat adaptado ou inline se for simples, por enquanto reusamos a lógica básica de UI, mas o endpoint é diferente -->
+    <style>
+        body {
+            background: #f7f7f7;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, .1);
+            background-color: #fff;
+        }
+
+        .chat-window {
+            height: 70vh;
+            overflow-y: auto;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .user-message {
+            justify-content: flex-end;
+            text-align: right;
+        }
+
+        .assistant-message {
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 1rem;
+        }
+
+        .user-message .message-content {
+            background-color: #9af79f;
+            align-self: flex-end;
+        }
+
+        .assistant-message .message-content {
+            background-color: #e2e2e2;
+        }
+
+        .assistant-type {
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .chat-input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .send-button {
+            background-color: #007bff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color .3s;
+        }
+
+        .send-button:hover {
+            background-color: #0056b3;
+        }
+
+        .message-timestamp {
+            font-size: .75rem !important;
+            color: #888 !important;
+            margin-top: 5px !important;
+            text-align: right !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="chat-container">
+        <div class="chat-window" id="chat-window">
+            <% if (messages && messages.length> 0) { %>
+                <% messages.forEach(message=> {
+                    let rawContent;
+                    if (typeof message?.content === 'string') {
+                    rawContent = message.content;
+                    } else {
+                    try { rawContent = JSON.stringify(message?.content ?? '', null, 2); } catch (e) { rawContent =
+                    String(message?.content ?? ''); }
+                    }
+                    const userText = (rawContent || '');
+                    const assistantText = (rawContent || '');
+                    %>
+                    <div class="message <%= message.sender === 'user' ? 'user-message' : 'assistant-message' %>">
+                        <div class="message-content">
+                            <% if (message.sender==='user' ) { %>
+                                <div class="assistant-type">Você</div>
+                                <%= userText.replace(/\n/g, '<br>' ) %>
+                                    <% } else { %>
+                                        <div class="assistant-type">Assistente</div>
+                                        <%- assistantText.replace(/\n/g, '<br>' ) %>
+                                            <% } %>
+                        </div>
+                    </div>
+                    <% }) %>
+                        <% } else { %>
+                            <p class="text-muted text-center pt-5">Olá! Como posso ajudar hoje?</p>
+                            <% } %>
+        </div>
+
+        <div class="chat-input-container">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Digite sua mensagem..." required>
+            <button id="send-button" class="send-button">Enviar</button>
+        </div>
+
+        <script>
+            // Lógica simples de chat para o View Genérico
+            const chatWindow = document.getElementById('chat-window');
+            const chatInput = document.getElementById('chat-input');
+            const sendButton = document.getElementById('send-button');
+
+            function scrollToBottom() {
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+
+            // Auto-scroll on load
+            scrollToBottom();
+
+            async function sendMessage() {
+                const text = chatInput.value.trim();
+                if (!text) return;
+
+                // Add user message to UI
+                appendMessage('user', text);
+                chatInput.value = '';
+
+                try {
+                    const response = await fetch('/chat-gen/message', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: text })
+                    });
+
+                    if (!response.ok) throw new Error('Erro na requisição');
+
+                    // Prepare assistant message bubble
+                    const msgId = 'msg-' + Date.now();
+                    appendMessage('assistant', '', msgId);
+                    const msgContentDiv = document.querySelector(`#${msgId} .message-content div:last-child`); // hacky selector
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        const chunk = decoder.decode(value, { stream: true });
+                        const lines = chunk.split('\n\n');
+
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                try {
+                                    const json = JSON.parse(line.substring(6));
+                                    if (json.chunk) {
+                                        buffer += json.chunk;
+                                        // Update UI
+                                        // Simple text update, replacing newlines
+                                        document.getElementById(msgId + '-text').innerHTML = buffer.replace(/\n/g, '<br>');
+                                        scrollToBottom();
+                                    }
+                                } catch (e) { }
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error(err);
+                    appendMessage('assistant', 'Desculpe, ocorreu um erro.');
+                }
+            }
+
+            function appendMessage(sender, text, id = null) {
+                const div = document.createElement('div');
+                div.className = `message ${sender === 'user' ? 'user-message' : 'assistant-message'}`;
+                if (id) div.id = id;
+
+                const contentClass = sender === 'user' ? '#9af79f' : '#e2e2e2'; // manual inline style equivalent
+
+                div.innerHTML = `
+        <div class="message-content">
+          <div class="assistant-type">${sender === 'user' ? 'Você' : 'Assistente'}</div>
+          <div id="${id ? id + '-text' : ''}">${text.replace(/\n/g, '<br>')}</div>
+        </div>
+      `;
+                chatWindow.appendChild(div);
+                scrollToBottom();
+            }
+
+            sendButton.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+        </script>
+    </div>
+
+</body>
+
+</html>

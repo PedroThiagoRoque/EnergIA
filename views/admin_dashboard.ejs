@@ -207,6 +207,7 @@
                 <tr>
                     <th>Nome</th>
                     <th>Email</th>
+                    <th>Grupo</th>
                     <th>Role</th>
                     <th>Ação</th>
                     <th>Análise Perfil</th>
@@ -222,6 +223,13 @@
                         </td>
                         <td>
                             <%= user.email %>
+                        </td>
+                        <td>
+                            <select onchange="updateGroup('<%= user._id %>', this.value)" class="role-badge"
+                                style="background: #334155; color: white; border: 1px solid #475569;">
+                                <option value="Watts" <%=user.group==='Watts' ? 'selected' : '' %>>Watts</option>
+                                <option value="Volts" <%=user.group==='Volts' ? 'selected' : '' %>>Volts</option>
+                            </select>
                         </td>
                         <td>
                             <span class="role-badge role-<%= user.role %>">
@@ -306,6 +314,32 @@
             } catch (err) {
                 console.error(err);
                 alert('Erro na requisição. Verifique console.');
+            }
+        }
+
+        async function updateGroup(userId, group) {
+            if (!confirm(`Mudar grupo deste usuário para ${group}?`)) {
+                window.location.reload(); // Reverte a seleção visual
+                return;
+            }
+
+            try {
+                const res = await fetch('/admin/users/update-group', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, group })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    alert(data.message);
+                } else {
+                    alert('Erro: ' + data.error);
+                    window.location.reload();
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erro na requisição.');
+                window.location.reload();
             }
         }
 

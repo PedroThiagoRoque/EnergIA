@@ -74,6 +74,21 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
+// Atualizar Grupo (Admin)
+router.post('/users/update-group', async (req, res) => {
+    const { userId, group } = req.body;
+    if (!['Watts', 'Volts'].includes(group)) {
+        return res.status(400).json({ ok: false, error: 'Grupo inválido.' });
+    }
+    try {
+        await User.findByIdAndUpdate(userId, { group });
+        res.json({ ok: true, message: `Grupo atualizado para ${group}.` });
+    } catch (err) {
+        console.error('Erro ao atualizar grupo:', err);
+        res.status(500).json({ ok: false, error: 'Erro ao atualizar grupo.' });
+    }
+});
+
 // CRON JOBS API
 
 // Import CronManager singleton

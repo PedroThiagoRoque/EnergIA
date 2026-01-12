@@ -13,6 +13,7 @@ const editorRouter = require('./src/routes/editor');
 const authRouter = require('./src/routes/auth');
 const adminRouter = require('./src/routes/admin'); // Rota de Admin
 const apiRouter = require('./src/routes/api'); // Rotas da API Mobile
+const chatGenRouter = require('./src/routes/chatGen'); // Rota Chat Genérico (Volts)
 const { requireLogin } = require('./src/middleware/auth'); // Importando middleware de autenticação
 const weatherMiddleware = require('./src/middleware/weatherMiddleware'); // Importando middleware meteorológico
 const { getWeatherData, getTemperature } = require('./src/services/weatherService');
@@ -55,26 +56,37 @@ app.use('/chat', requireLogin, chatRouter);
 app.use('/editor', requireLogin, editorRouter);
 app.use('/admin', adminRouter); // Rota de Admin (já possui middleware interno)
 app.use('/api', apiRouter); // Rotas de API Pública (Mobile)
+app.use('/chat-gen', requireLogin, chatGenRouter); // Chat Genérico
 
 // Rotas que requerem autenticação - Aplicando requireLogin
-app.get('/dashboard', requireLogin, (req, res) => {
+app.get('/dashboard', requireLogin, async (req, res) => {
   const { getTemperature } = require('./src/services/weatherService');
-  getTemperature((err, weather) => {
-    let temperature = '--';
-    let weatherIcon = '';
-    if (!err && weather) {
-      temperature = weather.temperature;
-      weatherIcon = weather.icon;
-    }
-    res.render('dashboard', {
-      userName: req.session.userName,
-      temperature,
-      weatherIcon,
-      role: req.session.role // Passando a role para a view
-    });
-  });
-});
+  const User = require('./src/models/User'); // Ensure User model is available
 
+  try {
+    const user = await User.findById(req.session.userId);
+    // Determine view based on group
+    const viewName = (user && user.group === 'Volts') ? 'dashboard_gen' : 'dashboard';
+
+    getTemperature((err, weather) => {
+      let temperature = '--';
+      let weatherIcon = '';
+      if (!err && weather) {
+        temperature = weather.temperature;
+        weatherIcon = weather.icon;
+      }
+      res.render(viewName, {
+        userName: req.session.userName,
+        temperature,
+        weatherIcon,
+        role: req.session.role
+      });
+    });
+  } catch (err) {
+    console.error('Erro no dashboard:', err);
+    res.redirect('/login');
+  }
+});
 
 ///////////////////////////////////////////
 // Iniciar servidor

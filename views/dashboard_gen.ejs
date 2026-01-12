@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard do Usuário</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f3f4f6;
+            /* Light grey background */
+            color: #333;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin: 0;
+            padding: 20px 0;
+        }
+
+        .dashboard-container {
+            width: 95%;
+            max-width: 1200px;
+            padding: 30px;
+            border-radius: 12px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .logo-small {
+            width: 150px;
+            filter: grayscale(100%);
+            /* Make logo generic/grey */
+        }
+
+        .icon-user {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-user i {
+            font-size: 1.2rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #9ca3af;
+            font-size: 0.9rem;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 20px;
+        }
+
+        .btn-conversar-large {
+            background: #374151;
+            /* Charcoal Grey */
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 20px 40px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-conversar-large:hover {
+            background: #1f2937;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .weather-pill {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 50px;
+            color: #4b5563;
+        }
+
+        .user-dropdown-menu {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            min-width: 150px;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .user-dropdown-menu .dropdown-item {
+            color: #374151;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .user-dropdown-menu .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-dropdown-menu .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="row align-items-center mb-4">
+            <div class="col-6">
+                <img src="/public/logo-EnergIA.png" alt="Logo" class="logo-small">
+            </div>
+            <div class="col-6 d-flex justify-content-end position-relative">
+                <div class="icon-user" id="userMenuBtn" style="cursor:pointer;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <!-- Dropdown Menu -->
+                <div id="userDropdown" class="user-dropdown-menu" style="display:none;">
+                    <% if (typeof role !=='undefined' && role==='godmode' ) { %>
+                        <a href="/admin" class="dropdown-item" style="color: #ef4444; font-weight: 600;">⚡ Admin</a>
+                        <% } %>
+                            <a href="/logout" class="dropdown-item">Sair</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row justify-content-center align-items-center" style="min-height: 50vh;">
+            <div class="col-md-8 text-center">
+
+                <div class="mb-5">
+                    <h1 class="display-4" style="font-weight: 700; color: #111827;">Olá, <%= userName %>!</h1>
+                    <p class="lead" style="color: #6b7280;">Bem-vindo ao seu assistente virtual.</p>
+                </div>
+
+                <!-- Weather Widget (Grey/Neutral) -->
+                <div class="d-flex justify-content-center mb-5">
+                    <div class="weather-pill d-flex align-items-center px-4 py-2">
+                        <% if (weatherIcon) { %>
+                            <img src="https://openweathermap.org/img/wn/<%= weatherIcon %>@2x.png" alt="Weather"
+                                style="width: 40px; height: 40px; filter: grayscale(100%); opacity: 0.7;">
+                            <% } %>
+                                <span class="ml-3 h4 mb-0 font-weight-bold">
+                                    <%= temperature %>ºC
+                                </span>
+                                <span class="ml-2" style="font-size: 0.9rem;">em Pelotas</span>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <a href="/chat-gen" class="btn btn-conversar-large mx-auto">
+                    <div class="mr-3 p-3 rounded-circle" style="background: rgba(255,255,255,0.1);">
+                        <i class="fas fa-comment-alt fa-2x"></i>
+                    </div>
+                    <div class="text-left">
+                        <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8;">
+                            Assistente</div>
+                        <div style="font-size: 1.4rem; font-weight: 600;">Iniciar Conversa</div>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>LABCEE / UFPel - 2024 - 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userDropdown = document.getElementById('userDropdown');
+
+        document.addEventListener('click', function (event) {
+            if (userMenuBtn.contains(event.target)) {
+                userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+            } else {
+                userDropdown.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>
