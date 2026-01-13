@@ -79,7 +79,9 @@ app.get('/dashboard', requireLogin, async (req, res) => {
         userName: req.session.userName,
         temperature,
         weatherIcon,
-        role: req.session.role
+        role: req.session.role,
+        userId: req.session.userId,
+        group: user.group
       });
     });
   } catch (err) {

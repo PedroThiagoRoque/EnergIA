@@ -14,7 +14,7 @@ router.use(requireAdmin);
 router.get('/', async (req, res) => {
     try {
         // Busca todos os usuários, ordenados por última interação
-        const users = await User.find({}, 'name email role perfilUsuario dadosUso.ultimoCalculoPerfil dadosUso.ultimaInteracao')
+        const users = await User.find({}, 'name email role group perfilUsuario dadosUso.ultimoCalculoPerfil dadosUso.ultimaInteracao')
             .sort({ 'dadosUso.ultimaInteracao': -1 });
 
         // Busca os últimos 50 erros
