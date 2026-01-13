@@ -225,4 +225,18 @@ async function gerarNotificacaoToast({ perfil, weather, group }) {
     }
 }
 
-module.exports = { gerarEGravarDailyContent, gerarIcebreakersLocais, getTodayDateString, gerarNotificacaoToast };
+async function getDailyToasts() {
+    try {
+        const today = getTodayDateString();
+        const doc = await DailyData.findOne({ date: today });
+        if (doc && doc.toasts && doc.toasts.length > 0) {
+            return doc.toasts;
+        }
+        return [];
+    } catch (err) {
+        console.error('Erro ao recuperar daily toasts:', err);
+        return [];
+    }
+}
+
+module.exports = { gerarEGravarDailyContent, gerarIcebreakersLocais, getTodayDateString, gerarNotificacaoToast, getDailyToasts };

@@ -36,4 +36,15 @@ router.get('/notification', async (req, res) => {
     }
 });
 
+router.get('/notification/toasts', async (req, res) => {
+    try {
+        const { getDailyToasts } = require('../services/dailyContent');
+        const toasts = await getDailyToasts();
+        res.json({ toasts });
+    } catch (err) {
+        console.error('API /notification/toasts error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 module.exports = router;
