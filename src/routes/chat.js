@@ -227,28 +227,49 @@ router.post('/message', attachDynamicContext, async (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
-  try {
-    let chat = await Chat.findOne({ userId });
-    let threadId;
+  // =================================================================
+  // LÓGICA DE RETRY PARA THREAD (CORREÇÃO DE "Thread not found")
+  // =================================================================
+  // Se der erro de thread não encontrada, limpamos o ID no banco e tentamos de novo 1 vez.
 
-    if (!chat) {
+  let chat = await Chat.findOne({ userId });
+  let threadId = chat ? chat.threadId : null;
+  let retry = false;
+
+  const executeRun = async (currentTid) => {
+    // Cria thread se não existir
+    if (!currentTid) {
+      console.log(`[CHAT] Criando nova thread para user ${userId}...`);
       const thread = await openai.beta.threads.create();
-      threadId = thread.id;
-      chat = new Chat({ userId, threadId, messages: [] });
+      currentTid = thread.id;
+
+      if (!chat) {
+        chat = new Chat({ userId, threadId: currentTid, messages: [] });
+      } else {
+        chat.threadId = currentTid;
+      }
       await chat.save();
-    } else {
-      threadId = chat.threadId;
     }
 
-    // Persiste a mensagem do usuário
-    chat.messages.push({ sender: 'user', content: msgText, timestamp: new Date() });
-    await chat.save();
+    // Persiste a mensagem do usuário (se ainda não persistiu na tentativa 1)
+    // Nota: Para simplificar, assumimos que se estamos no retry, a msg user já foi salva na tentativa 1?
+    // Não, melhor salvar apenas se for sucesso no addMessageToThread, ou salvar antes?
+    // O código original salvava antes.
+    // Vamos manter a lógica original de salvar no banco ANTES de enviar pro OpenAI, 
+    // mas se der erro, o catch captura.
+
+    // Log do System Patch para debug
+    if (req.dynamicContext?.systemPatch) {
+      console.log(`[CHAT] System Patch (preview 1000 chars): ${req.dynamicContext.systemPatch.substring(0, 1000)}...`);
+      console.log(`[CHAT] System Patch END (last 500 chars): ...${req.dynamicContext.systemPatch.slice(-500)}`);
+    }
 
     const eficienciaId = await getOrCreateAssistantEficiencia();
 
     // Inicia Stream
+    console.log(`[CHAT] Iniciando RunStream na Thread ${currentTid} c/ Assistant ${eficienciaId}...`);
     const stream = await addMessageAndRunAssistantStream(
-      threadId,
+      currentTid,
       msgText,
       eficienciaId,
       req.dynamicContext.systemPatch
@@ -261,7 +282,6 @@ router.post('/message', attachDynamicContext, async (req, res) => {
         const chunk = event.data.delta.content?.[0]?.text?.value;
         if (chunk) {
           fullResponse += chunk;
-          // Envia chunk para o cliente
           res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
         }
       }
@@ -285,12 +305,53 @@ router.post('/message', attachDynamicContext, async (req, res) => {
     };
     res.write(`data: ${JSON.stringify(metadata)}\n\n`);
     res.end();
+  };
+
+  try {
+    // 1. Salva msg user no banco primeiro (consistência local)
+    if (!chat) {
+      // Se não existe doc de chat, cria um temporário sem threadId pra poder salvar a msg
+      // Mas o executeRun cria a thread. Vamos deixar o executeRun lidar com a criação do Chat doc se precisar.
+    } else {
+      chat.messages.push({ sender: 'user', content: msgText, timestamp: new Date() });
+      await chat.save();
+    }
+
+    await executeRun(threadId);
 
   } catch (err) {
-    console.error('Erro /message:', err);
-    // Tenta enviar erro via SSE se a conexão ainda estiver aberta
-    res.write(`data: ${JSON.stringify({ error: 'Erro ao processar mensagem' })}\n\n`);
-    res.end();
+    console.error('[CHAT] Erro ao processar mensagem:', err);
+
+    // Verifica se é erro de thread não encontrada. 
+    // OpenAI geralmente retorna 404 object not found.
+    const isThreadError = err.message && (
+      err.message.includes("No thread found") ||
+      err.message.includes("404") ||
+      err.status === 404
+    );
+
+    if (isThreadError && !retry) {
+      console.warn(`[CHAT] Thread ${threadId} inválida ou deletada! Tentando recuperar...`);
+      retry = true;
+
+      // Limpa threadId antiga
+      if (chat) {
+        chat.threadId = null; // Força criar nova
+        await chat.save();
+      }
+
+      try {
+        // Tenta de novo com threadId null -> vai criar uma nova
+        await executeRun(null);
+      } catch (retryErr) {
+        console.error('[CHAT] Falha na recuperação da thread:', retryErr);
+        res.write(`data: ${JSON.stringify({ error: 'Erro ao processar mensagem após recuperação.' })}\n\n`);
+        res.end();
+      }
+    } else {
+      res.write(`data: ${JSON.stringify({ error: 'Erro ao processar mensagem' })}\n\n`);
+      res.end();
+    }
   }
 });
 

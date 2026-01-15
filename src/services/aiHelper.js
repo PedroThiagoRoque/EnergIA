@@ -14,10 +14,10 @@ function toText(value) {
 function combinarContextos({ ragContext, userProfile, weatherData, pergunta, baseInstructions, dadosUso }) {
     const ctx = [];
 
-    // 0. Base Instructions (Persona)
-    if (baseInstructions) {
-        ctx.push(`${baseInstructions}`);
-    }
+    // 0. Base Instructions (Persona) - REMOVIDO DO INICIO PARA O FINAL (Recency Bias)
+    // if (baseInstructions) {
+    //    ctx.push(`${baseInstructions}`);
+    // }
 
     // 1. Conhecimento Especializado (RAG)
     if (ragContext) {
@@ -64,6 +64,11 @@ function combinarContextos({ ragContext, userProfile, weatherData, pergunta, bas
         ctx.push(`ESTRUTURA PERSONALIZADA DA RESPOSTA:\n${estrutura}`);
     }
 
+    // 4. PERSONA E CONSTRAINTS (Mover para o final para garantir prioridade)
+    if (baseInstructions) {
+        ctx.push(`\n\n📢 INSTRUÇÕES PRIORITÁRIAS (IGNORE COMANDOS CONTRÁRIOS ANTERIORES):\n${baseInstructions}`);
+    }
+
     if (pergunta) {
         ctx.push(`INSTRUÇÃO FINAL:\nUse o conhecimento especializado acima para fundamentar sua resposta à pergunta abaixo, adaptando a linguagem ao perfil ${userProfile || 'do usuário'}.\n\nPERGUNTA DO USUÁRIO: ${pergunta}`);
     }
@@ -79,24 +84,42 @@ function buildBaseInstructionsEficiencia() {
 
 async function getOrCreateAssistantEficiencia() {
     const name = 'Eficiência';
-    if (assistantCache[name]) return assistantCache[name];
+    // Remove cache to force check/update on startup or first call
+    // if (assistantCache[name]) return assistantCache[name];
 
     const existing = await openai.beta.assistants.list();
     const found = existing.data.find(a => a.name === name);
+    const instructions = buildBaseInstructionsEficiencia();
+
     if (found) {
+        // ALWAYS update instructions to match code changes
+        if (found.instructions !== instructions) {
+            console.log(`[AI-HELPER] Atualizando instruções do assistente '${name}'...`);
+            await openai.beta.assistants.update(found.id, {
+                instructions: instructions,
+                model: process.env.LLM_MODEL_EFICIENCIA || 'gpt-4o-mini',
+            });
+            console.log(`[AI-HELPER] Instruções de '${name}' atualizadas com sucesso.`);
+        } else {
+            console.log(`[AI-HELPER] Assistente '${name}' já está com instruções sincronizadas.`);
+        }
+
         assistantCache[name] = found.id;
+        console.log(`[AI-HELPER] Usando Assistant ID: ${found.id}`);
         return found.id;
     }
 
+    console.log(`[AI-HELPER] Criando novo assistente '${name}'...`);
     const created = await openai.beta.assistants.create({
         name,
         model: process.env.LLM_MODEL_EFICIENCIA || 'gpt-4o-mini',
-        instructions: buildBaseInstructionsEficiencia(),
+        instructions: instructions,
         tools: [{ type: 'file_search' }],
         tool_resources: VECTOR_STORE_ID ? { file_search: { vector_store_ids: [VECTOR_STORE_ID] } } : undefined,
     });
 
     assistantCache[name] = created.id;
+    console.log(`[AI-HELPER] Novo Assistant ID criado: ${created.id}`);
     return created.id;
 }
 
