@@ -34,7 +34,8 @@ const {
   combinarContextos,
   getOrCreateAssistantEficiencia,
   addMessageAndRunAssistant,
-  addMessageAndRunAssistantStream // Novo helper
+  addMessageAndRunAssistantStream, // Novo helper
+  getEficienciaInstructions
 } = require('../services/aiHelper');
 const { gerarIcebreakersLocais, getTodayDateString } = require('../services/dailyContent');
 
@@ -150,8 +151,18 @@ async function attachDynamicContext(req, res, next) {
     const weatherData = getWeatherFromRequest(req);
 
     // (4) Monta patch dinâmico de sistema
-    const ragContext = 'Use os documentos do vetor quando necessário; priorize normas NBR, conceitos de eficiência, iluminação e climatização.';
-    const systemPatch = combinarContextos({ ragContext, userProfile: perfil, weatherData, pergunta: rawMessage });
+    const ragContext = 'Justifique suas respostas com base em NBR 5413, NBR ISO/CIE 8995-1 e conceitos técnicos de eficiência energética.';
+    const baseInstructions = getEficienciaInstructions();
+
+    // combinarContextos agora aceita todas as flags para montar o prompt rico
+    const systemPatch = combinarContextos({
+      ragContext,
+      userProfile: perfil,
+      weatherData,
+      pergunta: rawMessage,
+      baseInstructions,
+      dadosUso
+    });
 
     req.dynamicContext = { dadosUso, perfil, weatherData, systemPatch };
     next();

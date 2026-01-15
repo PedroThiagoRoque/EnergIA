@@ -11,17 +11,64 @@ function toText(value) {
     try { return JSON.stringify(value, null, 2); } catch { return String(value); }
 }
 
-function combinarContextos({ ragContext, userProfile, weatherData, pergunta }) {
+function combinarContextos({ ragContext, userProfile, weatherData, pergunta, baseInstructions, dadosUso }) {
     const ctx = [];
-    if (ragContext) ctx.push(`CONHECIMENTO ESPECIALIZADO (RAG):\n${ragContext}`);
-    if (userProfile) ctx.push(`PERFIL ATUAL: ${userProfile}`);
-    if (weatherData && (weatherData.temperature != null || weatherData.weather?.description)) {
-        const w = `${weatherData.temperature ?? '?'}°C, ${weatherData.humidity ?? '?'}% umidade, ${weatherData.weather?.description ?? ''}`;
-        ctx.push(`CLIMA AGORA (${weatherData.city || 'local'}): ${w}`);
+
+    // 0. Base Instructions (Persona)
+    if (baseInstructions) {
+        ctx.push(`${baseInstructions}`);
     }
-    if (pergunta) ctx.push(`PERGUNTA DO USUÁRIO: ${pergunta}`);
-    ctx.push(`LOCALIZAÇÃO PADRÃO: ZB2 Pelotas/RS - Subtropical úmido`);
-    return ctx.join('\n\n');
+
+    // 1. Conhecimento Especializado (RAG)
+    if (ragContext) {
+        ctx.push(`CONHECIMENTO ESPECIALIZADO:\nUse a documentação especializada quando necessário para responder com precisão técnica sobre: ${ragContext}`);
+    }
+
+    // 2. Contexto Climático
+    if (weatherData) {
+        const temp = weatherData.temperature ?? '?';
+        const hum = weatherData.humidity ?? '?';
+        const desc = weatherData.weather?.description ?? 'N/A';
+        const city = weatherData.city || 'Pelotas/RS';
+        const hora = new Date().toLocaleTimeString('pt-BR');
+
+        ctx.push(`CONTEXTO CLIMÁTICO ATUAL EM ${city.toUpperCase()}:\n- Temperatura: ${temp}°C\n- Condição: ${desc}\n- Umidade: ${hum}%\n- Hora da consulta: ${hora}`);
+
+        // Recomendações dinâmicas simples baseadas no clima
+        let recClima = '• Mantenha o conforto térmico de forma passiva';
+        if (temp > 25) recClima = '• Aproveite a ventilação natural; evite ganho de calor solar direto';
+        if (temp < 15) recClima = '• Maximize aquecimento solar passivo; evite correntes de ar frio';
+
+        ctx.push(`RECOMENDAÇÕES ESPECÍFICAS PARA O CLIMA ATUAL:\n${recClima}`);
+        ctx.push(`ZONA BIOCLIMÁTICA: ZB2 (${city} - Subtropical Úmido)\n- Estratégias recomendadas: Ventilação cruzada no verão, aquecimento solar passivo no inverno`);
+    }
+
+    // 3. Personalização Baseada no Usuário
+    if (userProfile || dadosUso) {
+        const perfil = userProfile || 'Intermediário';
+        const uso = dadosUso || {};
+        const interactions = uso.totalInteracoes || 0;
+        const periodo = uso.periodoPreferencial || 'variável';
+
+        ctx.push(`PERSONALIZAÇÃO BASEADA NO USUÁRIO:\n- PERFIL: ${perfil}\n- HISTÓRICO DE USO: ${uso.frequenciaUso || 'novo'}, interage principalmente no periodo da ${periodo}; ${interactions} interações registradas.\n- PILARES TCP ATIVOS: atitude, norma, controle`);
+
+        // Guidelines de estrutura baseadas no perfil
+        let estrutura = '';
+        if (perfil === 'Proativo') {
+            estrutura = '1. Cumprimente de forma adequada ao perfil Proativo\n2. Inclua benefício pessoal claro (econômico, conforto, ambiental)\n3. Adicione referência social motivadora\n4. Sugira ação simples e acessível para hoje\n5. Insira a dica com "💡"\n6. Mencione influência do clima\n7. Finalize com convite suave';
+        } else if (perfil === 'Descuidado') {
+            estrutura = '1. Use tom acolhedor e muito simples\n2. Foque apenas em economia financeira imediata\n3. Sugira uma única ação extremamente fácil\n4. Reforce que "todo começo importa"\n5. Evite qualquer tecnicismo';
+        } else {
+            estrutura = '1. Cumprimente com energia moderada\n2. Relacione conforto e economia\n3. Sugira ação prática de médio impacto\n4. Convite a experimentar novos hábitos';
+        }
+        ctx.push(`ESTRUTURA PERSONALIZADA DA RESPOSTA:\n${estrutura}`);
+    }
+
+    if (pergunta) {
+        ctx.push(`INSTRUÇÃO FINAL:\nUse o conhecimento especializado acima para fundamentar sua resposta à pergunta abaixo, adaptando a linguagem ao perfil ${userProfile || 'do usuário'}.\n\nPERGUNTA DO USUÁRIO: ${pergunta}`);
+    }
+
+    return ctx.join('\n\n========================================\n\n');
 }
 
 const prompts = require('../config/prompts');
@@ -140,5 +187,7 @@ module.exports = {
     addMessageAndRunAssistant,
     runAssistantOnThreadStream,
     addMessageAndRunAssistantStream,
-    getOrCreateAssistantVolts
+    addMessageAndRunAssistantStream,
+    getOrCreateAssistantVolts,
+    getEficienciaInstructions: () => prompts.assistants.eficiencia.instructions
 };

@@ -1,0 +1,70 @@
+@startuml
+!theme vibrant
+title Fluxo do Agente Neutro (Volts)
+
+actor "Usuário (Grupo Volts)" as User
+participant "App / Chat Genérico" as App
+participant "Backend" as Service
+participant "OpenAI API" as OpenAI
+database "Vector Store (RAG)" as RAG
+
+== Inicialização (Lazy Loading) ==
+
+Service -> Service: Verificar/Criar Assistente 'Volts'
+alt Assistente não existe
+    Service -> OpenAI: Criar Novo Assistente
+    note right
+        **Configuração:**
+        - Model: gpt-4o-mini
+        - Tools: [] (Vazio)
+        - Instruções: Persona Neutra/Cordial
+    end note
+    OpenAI --> Service: Retorna ID do Assistente
+end
+
+== Fluxo de Interação (Chat) ==
+
+User -> App: Envia Pergunta
+App -> Service: POST /message (Valida Grupo)
+
+activate Service
+    alt Usuário incorreto (Grupo Watts)
+        Service --> App: Redirecionar /chat
+    end
+
+    Service -> Service: Carregar Contexto Básico
+    
+    note right of Service
+        **Contexto Simplificado**
+        Apenas histórico da conversa.
+        Sem dados de sensores ou perfil técnico.
+    end note
+
+    Service -> OpenAI: Adicionar Mensagem do Usuário
+    
+    Service -> OpenAI: Executar Run (Sem RAG)
+    activate OpenAI
+    
+    note right of OpenAI
+        **Processamento Simples**
+        Modelo responde com conhecimento
+        geral pré-treinado.
+        **SEM ACESSO** à Vector Store.
+    end note
+    
+    OpenAI -[hidden]-> RAG: (Sem Conexão)
+    
+    OpenAI --> Service: Run Concluído
+    deactivate OpenAI
+
+    Service -> OpenAI: Listar Mensagens
+    activate OpenAI
+    OpenAI --> Service: Última Resposta
+    deactivate OpenAI
+
+    Service --> App: Resposta Texto (Stream/Block)
+deactivate Service
+
+App --> User: Exibe Resposta
+
+@enduml
