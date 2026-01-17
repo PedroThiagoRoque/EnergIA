@@ -4,6 +4,7 @@ const app = express();
 const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 
 require('dotenv').config();
 
@@ -37,6 +38,10 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+  cookie: {
+    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 dias em milissegundos
+  }
 }));
 
 // Middleware para dados meteorológicos (aplicado globalmente para rotas autenticadas)
